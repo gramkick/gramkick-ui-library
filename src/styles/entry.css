@@ -1,0 +1,10 @@
+/*
+ * Build entry for the prebuilt stylesheet shipped as `@gramkick/ui/styles.css`.
+ * `npm run build:css` compiles this with the Tailwind CLI, scanning every
+ * component source file so the output carries exactly the utilities the library
+ * uses — nothing more.
+ */
+@import "tailwindcss";
+@import "./theme.css";
+
+@source "../**/*.{ts,tsx}";

@@ -1,0 +1,46 @@
+/*
+ * GramKick design tokens — Tailwind v4 `@theme`.
+ *
+ * Consumers on Tailwind v4:   @import "@gramkick/ui/theme.css";
+ * Consumers without Tailwind:  @import "@gramkick/ui/styles.css";  (prebuilt, includes these)
+ *
+ * These names match the tokens currently duplicated in every GramKick front-end's
+ * `app.css` / `globals.css`. Point those files here instead of redefining them.
+ */
+@theme {
+  /* surfaces & text */
+  --color-ink: #10233a;
+  --color-muted: #5d6866;
+  --color-line: #e2e8e8;
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+
+  /* brand — warm saffron / green local-commerce language */
+  --color-mint: #eff8f0;
+  --color-leaf: #087a35;
+  --color-leaf-dark: #056129;
+  --color-lime: #dff27a;
+  --color-art: #dceee2;
+  --color-sun: #f5d76b;
+
+  /* accents */
+  --color-danger: #b42318;
+  --color-brand-blue: #3157d4;
+  --color-soft-blue: #e7efff;
+  --color-soft-yellow: #fff4dc;
+
+  /* typography */
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-display: Arial, Helvetica, sans-serif;
+
+  /* radii — `gk-` prefixed so they never clobber a consumer's own scale */
+  --radius-gk-sm: 0.375rem;
+  --radius-gk-md: 0.625rem;
+  --radius-gk-lg: 1rem;
+  --radius-gk-xl: 1.5rem;
+
+  /* elevation */
+  --shadow-art: 0 18px 40px rgb(29 71 47 / 12%);
+  --shadow-modal: 0 24px 60px rgb(11 41 27 / 28%);
+  --shadow-card: 0 10px 30px rgb(16 35 58 / 5%);
+}

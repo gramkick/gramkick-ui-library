@@ -1,0 +1,5 @@
+dist
+coverage
+storybook-static
+package-lock.json
+CHANGELOG.md
