@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "GramKick reusable React component library — tokens, primitives, and accessible components shared across the GramKick front-ends.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gramkick/gramkick-ui-library.git"
+  },
+  "homepage": "https://github.com/gramkick/gramkick-ui-library#readme",
+  "bugs": {
+    "url": "https://github.com/gramkick/gramkick-ui-library/issues"
+  },
   "type": "module",
   "sideEffects": [
     "**/*.css"
