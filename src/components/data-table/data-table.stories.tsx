@@ -128,6 +128,7 @@ const meta = {
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
     selectionMode: { control: "inline-radio", options: ["checkbox", "menu"] },
     loading: { control: "boolean" },
+    isHeaderLoading: { control: "boolean" },
     selectable: { control: "boolean" },
     stickyFirstColumn: { control: "boolean" },
     stickyActions: { control: "boolean" },
@@ -224,6 +225,21 @@ export const FixedHeight: Story = {
 };
 
 export const Loading: Story = { args: { loading: true, pagination: true, defaultPageSize: 8 } };
+
+export const LoadingWithHeader: Story = {
+  args: {
+    loading: true,
+    isHeaderLoading: true,
+    selectable: true,
+    pagination: true,
+    defaultPageSize: 8,
+    actions: () => (
+      <Button size="sm" variant="ghost">
+        Edit
+      </Button>
+    ),
+  },
+};
 
 export const Empty: Story = {
   args: {

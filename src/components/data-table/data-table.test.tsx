@@ -43,6 +43,38 @@ describe("DataTable", () => {
     expect(screen.queryByText("User 1")).not.toBeInTheDocument();
   });
 
+  it("puts the pagination footer in a loading state too", () => {
+    const { rerender } = render(
+      <DataTable columns={columns} data={rows} loading pagination defaultPageSize={10} />,
+    );
+    // No usable pager or page-size control while loading…
+    expect(screen.queryByRole("button", { name: "Next page" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Rows per page" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();
+    // …and it comes back once loading clears.
+    rerender(<DataTable columns={columns} data={rows} pagination defaultPageSize={10} />);
+    expect(screen.getByRole("button", { name: "Next page" })).toBeInTheDocument();
+    expect(screen.getByText(/Showing 1.10 of 25/)).toBeInTheDocument();
+  });
+
+  it("keeps the header live by default and skeletonises it with isHeaderLoading", () => {
+    const { container, rerender } = render(
+      <DataTable columns={columns} data={rows} loading selectable />,
+    );
+    // Default: header text still shows even while the body is loading.
+    expect(screen.getByText("Member")).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: "Select all rows on this page" }),
+    ).toBeInTheDocument();
+
+    rerender(<DataTable columns={columns} data={rows} loading isHeaderLoading selectable />);
+    expect(screen.queryByText("Member")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("checkbox", { name: "Select all rows on this page" }),
+    ).not.toBeInTheDocument();
+    expect(container.querySelectorAll('thead [data-slot="skeleton"]').length).toBeGreaterThan(0);
+  });
+
   it("shows an error state", () => {
     render(<DataTable columns={columns} data={[]} error="Server said no" />);
     const alert = screen.getByRole("alert");

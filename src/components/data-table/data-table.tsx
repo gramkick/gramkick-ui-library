@@ -114,6 +114,11 @@ export interface DataTableProps<T> {
   /** `Skeleton` rows instead of data (kept at row height to avoid layout shift). */
   loading?: boolean;
   loadingRows?: number;
+  /**
+   * While `loading`, also render a `Skeleton` in every header cell (the header is
+   * live by default). No effect unless `loading`.
+   */
+  isHeaderLoading?: boolean;
   /** Replace the default skeleton body. */
   loadingState?: ReactNode;
   /** Anything truthy shows the error state in place of the rows. */
@@ -386,6 +391,7 @@ export function DataTable<T>({
   highlightBackgroundColor,
   loading = false,
   loadingRows,
+  isHeaderLoading = false,
   loadingState,
   error,
   errorState,
@@ -695,7 +701,9 @@ export function DataTable<T>({
     </tr>
   );
 
-  /* ---- header select control ---- */
+  /* ---- header ---- */
+  // When asked, the header follows the body into a skeleton state.
+  const headerLoading = loading && isHeaderLoading;
   const headerSelect = selectable ? (
     <div className="flex items-center gap-1">
       <Checkbox
@@ -835,6 +843,31 @@ export function DataTable<T>({
     </div>
   ) : null;
 
+  // While `loading`, the footer mirrors its own layout as skeletons so the
+  // page-size control and pager don't read as usable before the data lands.
+  const footerSkeleton = showFooter ? (
+    <div
+      aria-hidden="true"
+      className="flex flex-col gap-3 border-t border-line px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div className="flex items-center gap-x-2 gap-y-1.5 sm:gap-x-3">
+        <Skeleton variant="rounded" width={112} height={32} className="shrink-0" />
+        <Skeleton width={132} height={12} />
+      </div>
+      <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+        {Array.from({ length: 5 }, (_, i) => (
+          <Skeleton
+            key={`pg-sk-${i}`}
+            variant="rounded"
+            width={32}
+            height={32}
+            className="shrink-0"
+          />
+        ))}
+      </div>
+    </div>
+  ) : null;
+
   const scrollStyle: CSSProperties | undefined = maxHeight
     ? {
         [isFixedHeight ? "height" : "maxHeight"]:
@@ -892,7 +925,13 @@ export function DataTable<T>({
                     pinHeader && pinCheckbox && "z-30",
                   )}
                 >
-                  {headerSelect}
+                  {headerLoading ? (
+                    <span className="flex items-center">
+                      <Skeleton variant="rounded" width={16} height={16} />
+                    </span>
+                  ) : (
+                    headerSelect
+                  )}
                 </th>
               ) : null}
               {columns.map((col, ci) => {
@@ -903,7 +942,7 @@ export function DataTable<T>({
                     key={col.id}
                     scope="col"
                     aria-sort={
-                      col.sortable
+                      col.sortable && !headerLoading
                         ? activeDir === "asc"
                           ? "ascending"
                           : activeDir === "desc"
@@ -919,7 +958,17 @@ export function DataTable<T>({
                       col.headerClassName,
                     )}
                   >
-                    {col.sortable ? (
+                    {headerLoading ? (
+                      <span
+                        className={cn(
+                          "flex items-center",
+                          col.align === "right" && "justify-end",
+                          col.align === "center" && "justify-center",
+                        )}
+                      >
+                        <Skeleton width={56 + ((ci * 17) % 44)} height={12} />
+                      </span>
+                    ) : col.sortable ? (
                       <button
                         type="button"
                         onClick={() => cycleSort(col.id)}
@@ -947,7 +996,13 @@ export function DataTable<T>({
                     stickyActions && pinHeader && "z-30",
                   )}
                 >
-                  {actionsHeader ?? <span className="sr-only">Actions</span>}
+                  {headerLoading ? (
+                    <span className="flex items-center justify-end">
+                      <Skeleton width={48} height={12} />
+                    </span>
+                  ) : (
+                    (actionsHeader ?? <span className="sr-only">Actions</span>)
+                  )}
                 </th>
               ) : null}
             </tr>
@@ -984,7 +1039,7 @@ export function DataTable<T>({
         </table>
       </div>
 
-      {footer}
+      {loading ? footerSkeleton : footer}
     </div>
   );
 }

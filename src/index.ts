@@ -2,6 +2,7 @@ export { cn } from "./lib/cn";
 export type { DateRange } from "./lib/date";
 
 export * from "./components/icon";
+export * from "./components/text";
 export * from "./components/button";
 export * from "./components/badge";
 export * from "./components/card";

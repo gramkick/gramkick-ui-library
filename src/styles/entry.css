@@ -8,3 +8,17 @@
 @import "./theme.css";
 
 @source "../**/*.{ts,tsx}";
+
+/*
+ * Force the full public token surface into the prebuilt stylesheet, so apps that
+ * consume `styles.css` directly (no Tailwind build of their own) get every token
+ * as a ready utility — not just the ones the components happen to reference.
+ * Tailwind v4 consumers importing `theme.css` generate these on demand instead.
+ */
+@source inline("font-{sans,display}");
+@source inline(
+  "text-{display,h1,h2,h3,h4,h5,h6,body-lg,body,body-sm,caption,overline,label,price}"
+);
+@source inline("rounded-gk-{xs,sm,md,lg,xl,2xl,full}");
+@source inline("shadow-{gk-xs,gk-sm,gk-md,gk-lg,gk-xl,card,art,modal}");
+@source inline("{border,bg,text}-line-strong");

@@ -12,6 +12,8 @@
   --color-ink: #10233a;
   --color-muted: #5d6866;
   --color-line: #e2e8e8;
+  /* stronger divider / border — inputs, table outlines, emphasised rules */
+  --color-line-strong: #c7d2d2;
   --color-canvas: #ffffff;
   --color-surface: #ffffff;
 
@@ -29,20 +31,111 @@
   --color-soft-blue: #e7efff;
   --color-soft-yellow: #fff4dc;
 
-  /* typography */
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-display: Arial, Helvetica, sans-serif;
+  /* ---- typography --------------------------------------------------------- *
+   * Family: Inter, loaded by each app (Google Fonts / self-host / next/font).
+   * `--font-display` tracks `--font-sans` — one face across every portal, so a
+   * consumer that swaps the body font gets matching headings for free.
+   */
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-sans);
 
-  /* radii — `gk-` prefixed so they never clobber a consumer's own scale */
+  /*
+   * Type scale — e-commerce roles, base 16px. Each token sets size +
+   * line-height + tracking; the `Text` / `Heading` components add the weight,
+   * so the bare `text-h1` … `text-price` utilities are usable on their own too.
+   * The four large steps are fluid (`clamp`) — one class spans mobile → desktop.
+   */
+  --text-display: clamp(2.75rem, 1.9rem + 4.25vw, 4rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.021em;
+
+  --text-h1: clamp(2rem, 1.55rem + 2.25vw, 2.75rem);
+  --text-h1--line-height: 1.12;
+  --text-h1--letter-spacing: -0.02em;
+
+  --text-h2: clamp(1.625rem, 1.36rem + 1.35vw, 2.125rem);
+  --text-h2--line-height: 1.18;
+  --text-h2--letter-spacing: -0.017em;
+
+  --text-h3: clamp(1.375rem, 1.23rem + 0.7vw, 1.625rem);
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.012em;
+
+  --text-h4: 1.25rem;
+  --text-h4--line-height: 1.3;
+  --text-h4--letter-spacing: -0.01em;
+
+  --text-h5: 1.125rem;
+  --text-h5--line-height: 1.4;
+  --text-h5--letter-spacing: -0.006em;
+
+  --text-h6: 1rem;
+  --text-h6--line-height: 1.45;
+  --text-h6--letter-spacing: 0;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.65;
+  --text-body-lg--letter-spacing: 0;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-body--letter-spacing: 0;
+
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.55;
+  --text-body-sm--letter-spacing: 0;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.5;
+  --text-caption--letter-spacing: 0.004em;
+
+  --text-overline: 0.6875rem;
+  --text-overline--line-height: 1.4;
+  --text-overline--letter-spacing: 0.09em;
+
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.25;
+  --text-label--letter-spacing: 0.005em;
+
+  --text-price: 1.125rem;
+  --text-price--line-height: 1.2;
+  --text-price--letter-spacing: -0.01em;
+
+  /* ---- radii ------------------------------------------------------------- *
+   * `gk-` prefixed so they never clobber a consumer's own `--radius-*` scale.
+   * Utilities: `rounded-gk-xs` … `rounded-gk-2xl`, `rounded-gk-full`.
+   */
+  --radius-gk-xs: 0.25rem;
   --radius-gk-sm: 0.375rem;
   --radius-gk-md: 0.625rem;
   --radius-gk-lg: 1rem;
   --radius-gk-xl: 1.5rem;
+  --radius-gk-2xl: 2rem;
+  --radius-gk-full: 9999px;
 
-  /* elevation */
+  /* ---- borders --------------------------------------------------------- *
+   * Colour comes from `--color-line` (subtle, the default) or
+   * `--color-line-strong`; width stays on Tailwind's own `border` / `border-2`.
+   * The shorthands below are for hand-written CSS — `border: var(--gk-border)`.
+   */
+  --gk-border: 1px solid var(--color-line);
+  --gk-border-strong: 1px solid var(--color-line-strong);
+
+  /* ---- elevation ------------------------------------------------------- *
+   * A neutral, ink-tinted ladder (`shadow-gk-xs` … `shadow-gk-xl`) for general
+   * use, plus the three semantic names the components are built on.
+   */
+  --shadow-gk-xs: 0 1px 2px rgb(16 35 58 / 6%);
+  --shadow-gk-sm: 0 2px 6px rgb(16 35 58 / 8%);
+  --shadow-gk-md: 0 6px 16px rgb(16 35 58 / 10%);
+  --shadow-gk-lg: 0 14px 34px rgb(16 35 58 / 12%);
+  --shadow-gk-xl: 0 24px 60px rgb(16 35 58 / 16%);
+
+  --shadow-card: 0 10px 30px rgb(16 35 58 / 5%);
   --shadow-art: 0 18px 40px rgb(29 71 47 / 12%);
   --shadow-modal: 0 24px 60px rgb(11 41 27 / 28%);
-  --shadow-card: 0 10px 30px rgb(16 35 58 / 5%);
 
   /* motion — the left-to-right skeleton sweep */
   --animate-skeleton-shimmer: skeleton-shimmer 1.6s ease-in-out infinite;
