@@ -12,26 +12,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
 import { useControllableState } from "../../hooks/use-controllable-state";
 import { toOptionGroups, type DropdownOption, type DropdownCategories } from "../dropdown/dropdown";
+import { CheckIcon as TickIcon } from "../icon";
 
 /** Same shape as a `Dropdown` option. */
 export type ListItem = DropdownOption;
 /** Grouped rows, keyed by category name — used with `isCategoriesList`. */
 export type ListItemCategories = DropdownCategories;
-
-function TickIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M3.5 8.5l3 3 6-7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 /** Chrome around the option rows — mirrors `Dropdown`'s `variant` axis. */
 export const listItemsVariants = cva("overflow-hidden rounded-gk-md", {

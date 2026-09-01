@@ -12,53 +12,7 @@ import {
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
 import { useControllableState } from "../../hooks/use-controllable-state";
-
-/* ------------------------------------------------------------------ icons -- */
-
-function ChevronIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      aria-hidden="true"
-    >
-      <path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function CrossIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      aria-hidden="true"
-    >
-      <path d="M4 4l8 8M12 4l-8 8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function TickIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M3.5 8.5l3 3 6-7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
+import { ChevronDownIcon as ChevronIcon, XIcon as CrossIcon, CheckIcon as TickIcon } from "../icon";
 
 /* ------------------------------------------------------------------ types -- */
 

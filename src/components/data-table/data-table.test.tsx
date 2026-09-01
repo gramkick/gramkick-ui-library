@@ -310,4 +310,21 @@ describe("DataTable", () => {
     // no width on any column -> no <colgroup> at all
     expect(container.querySelector("colgroup")).toBeNull();
   });
+
+  it("maxHeight caps the scroll region; isFixedHeight makes it a fixed height + pins the header", () => {
+    const { container, rerender } = render(
+      <DataTable columns={columns} data={rows} maxHeight={300} />,
+    );
+    const scroll = () => container.querySelector<HTMLElement>('[data-slot="data-table-scroll"]')!;
+    expect(scroll().style.maxHeight).toBe("300px");
+    expect(scroll().style.height).toBe("");
+    // header not pinned without stickyHeader / isFixedHeight
+    expect(container.querySelector("thead th")).not.toHaveClass("sticky");
+
+    rerender(<DataTable columns={columns} data={rows} maxHeight={300} isFixedHeight />);
+    expect(scroll().style.height).toBe("300px");
+    expect(scroll().style.maxHeight).toBe("");
+    expect(scroll()).toHaveClass("overflow-y-auto");
+    expect(container.querySelector("thead th")).toHaveClass("sticky", "top-0");
+  });
 });

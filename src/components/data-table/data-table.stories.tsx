@@ -131,6 +131,8 @@ const meta = {
     selectable: { control: "boolean" },
     stickyFirstColumn: { control: "boolean" },
     stickyActions: { control: "boolean" },
+    stickyHeader: { control: "boolean" },
+    isFixedHeight: { control: "boolean" },
   },
   args: { columns, data: members, "aria-label": "Members" },
   decorators: [
@@ -200,6 +202,24 @@ export const Sorting: Story = {
     defaultPageSize: 10,
     // Sortable columns show a toggle in the header; click cycles asc → desc → off.
     defaultSort: { id: "spend", dir: "desc" },
+  },
+};
+
+export const FixedHeight: Story = {
+  args: {
+    variant: "striped",
+    isFixedHeight: true,
+    maxHeight: 340,
+    pagination: true,
+    defaultPageSize: 25,
+    selectable: true,
+    stickyFirstColumn: true,
+    stickyActions: true,
+    actions: () => (
+      <Button size="sm" variant="ghost">
+        Edit
+      </Button>
+    ),
   },
 };
 

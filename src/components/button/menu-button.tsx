@@ -14,22 +14,8 @@ import {
 import { createPortal } from "react-dom";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
+import { ChevronDownIcon as ChevronIcon } from "../icon";
 import { Button, type buttonVariants } from "./button";
-
-function ChevronIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      aria-hidden="true"
-    >
-      <path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 export interface MenuButtonItem {
   /** Row content. */

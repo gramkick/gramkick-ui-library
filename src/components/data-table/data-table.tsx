@@ -15,33 +15,10 @@ import { Checkbox } from "../selection/selection";
 import { Dropdown } from "../dropdown/dropdown";
 import { EmptyState } from "../empty-state/empty-state";
 import { Skeleton } from "../skeleton/skeleton";
+import { ChevronRightIcon as Chevron, ChevronDownIcon as Caret } from "../icon";
 
 /* ------------------------------------------------------------------ icons -- */
 
-const Chevron = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    aria-hidden="true"
-  >
-    <path d="M6 3l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const Caret = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    aria-hidden="true"
-  >
-    <path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 /** Stacked triangles: the active direction is `leaf` green, the other a faint ink. */
 const SortIcon = ({ dir }: { dir: "asc" | "desc" | null }) => (
   <svg viewBox="0 0 16 16" className="size-4 shrink-0" aria-hidden="true">
@@ -150,6 +127,12 @@ export interface DataTableProps<T> {
 
   /** `<thead>` sticks to the top while the body scrolls (needs `maxHeight`). */
   stickyHeader?: boolean;
+  /**
+   * Give the scroll region a **fixed** height (from `maxHeight`) instead of a
+   * cap: the body always fills it and scrolls vertically, with the header pinned
+   * and the footer outside the scroll. No effect without `maxHeight`.
+   */
+  isFixedHeight?: boolean;
   /**
    * Pin the leading column to the left edge — the selection checkbox when
    * `selectable`, otherwise the first data column. Its shadow only shows once
@@ -346,7 +329,7 @@ function SelectionMenu({
         onClick={() => setOpen((o) => !o)}
         className="flex cursor-pointer items-center rounded p-0.5 text-muted hover:bg-mint hover:text-ink"
       >
-        <Caret className="size-3.5" />
+        <Caret className={cn("size-3.5 transition-transform duration-150", open && "rotate-180")} />
       </button>
       {open && pos && typeof document !== "undefined"
         ? createPortal(
@@ -410,6 +393,7 @@ export function DataTable<T>({
   emptyTitle = "Nothing here yet",
   emptyDescription,
   stickyHeader = false,
+  isFixedHeight = false,
   stickyFirstColumn = false,
   actions,
   actionsHeader,
@@ -576,7 +560,9 @@ export function DataTable<T>({
   const rightShadow =
     "after:pointer-events-none after:absolute after:inset-y-0 after:left-0 after:w-3 after:-translate-x-full after:bg-gradient-to-l after:from-ink/10 after:to-transparent";
 
-  const headStickyTop = stickyHeader ? "sticky top-0 z-10 bg-mint" : "";
+  // A fixed-height table pins its header too, so only the body scrolls.
+  const pinHeader = stickyHeader || isFixedHeight;
+  const headStickyTop = pinHeader ? "sticky top-0 z-10 bg-mint" : "";
   const thBase = cn(
     "whitespace-nowrap align-middle font-semibold text-muted",
     PAD[size],
@@ -850,7 +836,10 @@ export function DataTable<T>({
   ) : null;
 
   const scrollStyle: CSSProperties | undefined = maxHeight
-    ? { maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight }
+    ? {
+        [isFixedHeight ? "height" : "maxHeight"]:
+          typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight,
+      }
     : undefined;
 
   return (
@@ -900,7 +889,7 @@ export function DataTable<T>({
                     thBase,
                     "w-0",
                     leftPinned(pinCheckbox, "bg-mint"),
-                    stickyHeader && pinCheckbox && "z-30",
+                    pinHeader && pinCheckbox && "z-30",
                   )}
                 >
                   {headerSelect}
@@ -926,7 +915,7 @@ export function DataTable<T>({
                       thBase,
                       alignClass(col.align),
                       leftPinned(pinned, "bg-mint"),
-                      pinned && stickyHeader && "z-30",
+                      pinned && pinHeader && "z-30",
                       col.headerClassName,
                     )}
                   >
@@ -955,7 +944,7 @@ export function DataTable<T>({
                     thBase,
                     "w-0 text-right",
                     rightPinned("bg-mint"),
-                    stickyActions && stickyHeader && "z-30",
+                    stickyActions && pinHeader && "z-30",
                   )}
                 >
                   {actionsHeader ?? <span className="sr-only">Actions</span>}
