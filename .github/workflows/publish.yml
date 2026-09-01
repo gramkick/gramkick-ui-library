@@ -23,4 +23,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
-      - run: git push --follow-tags
+      # changeset publish creates the version tag locally; push it (checkout is
+      # detached HEAD, so `--follow-tags` would push nothing).
+      - run: git push origin --tags
