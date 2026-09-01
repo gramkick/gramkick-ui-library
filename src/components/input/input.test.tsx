@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Input } from "./input";
+
+const codes = [
+  { value: "+91", label: "India +91", triggerLabel: "+91" },
+  { value: "+1", label: "USA +1", triggerLabel: "+1" },
+  { value: "+44", label: "UK +44", triggerLabel: "+44", disabled: true },
+];
 
 describe("Input", () => {
   it("accepts typed text", async () => {
@@ -124,5 +130,146 @@ describe("Input", () => {
     const field = screen.getByLabelText("f");
     expect(field).toHaveClass("font-mono");
     expect(field.closest("div.w-40")).toBeInTheDocument();
+  });
+
+  it("renders a left select addon, opens it, and reports the pick", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <Input
+        label="Phone"
+        leftSelect={{ options: codes, defaultValue: "+91", "aria-label": "Country code", onChange }}
+      />,
+    );
+
+    const trigger = screen.getByRole("combobox", { name: "Country code" });
+    expect(trigger).toHaveTextContent("+91");
+
+    await user.click(trigger);
+    const list = screen.getByRole("listbox", { name: "Country code" });
+    await user.click(within(list).getByRole("option", { name: "USA +1" }));
+
+    expect(onChange).toHaveBeenCalledWith("+1");
+    expect(trigger).toHaveTextContent("+1");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  });
+
+  it("skips disabled addon options", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <Input
+        aria-label="Phone"
+        leftSelect={{ options: codes, defaultValue: "+91", "aria-label": "Country code", onChange }}
+      />,
+    );
+    await user.click(screen.getByRole("combobox", { name: "Country code" }));
+    await user.click(screen.getByRole("option", { name: "UK +44" }));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("option", { name: "UK +44" })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("joins the addon to the field by trimming the shared edge", () => {
+    const { rerender } = render(
+      <Input aria-label="p" leftSelect={{ options: codes, "aria-label": "code" }} />,
+    );
+    expect(screen.getByLabelText("p")).toHaveClass("rounded-l-none", "border-l-0");
+
+    rerender(<Input aria-label="p" rightSelect={{ options: codes, "aria-label": "unit" }} />);
+    expect(screen.getByLabelText("p")).toHaveClass("rounded-r-none", "border-r-0");
+  });
+
+  it("still accepts typed text alongside an addon", async () => {
+    render(
+      <Input
+        label="Phone"
+        leftSelect={{ options: codes, defaultValue: "+91", "aria-label": "code" }}
+      />,
+    );
+    const field = screen.getByRole("textbox", { name: "Phone" });
+    await userEvent.type(field, "9876543210");
+    expect(field).toHaveValue("9876543210");
+  });
+
+  it("disables the addon when the input is disabled", () => {
+    render(
+      <Input
+        aria-label="Phone"
+        disabled
+        leftSelect={{ options: codes, "aria-label": "Country code" }}
+      />,
+    );
+    expect(screen.getByRole("combobox", { name: "Country code" })).toBeDisabled();
+  });
+
+  it("supports a controlled addon value", async () => {
+    const user = userEvent.setup();
+    function Host() {
+      const [code, setCode] = useState("+91");
+      return (
+        <Input
+          aria-label="Phone"
+          leftSelect={{
+            options: codes,
+            value: code,
+            onChange: setCode,
+            "aria-label": "Country code",
+          }}
+        />
+      );
+    }
+    render(<Host />);
+    const trigger = screen.getByRole("combobox", { name: "Country code" });
+    await user.click(trigger);
+    await user.click(screen.getByRole("option", { name: "USA +1" }));
+    expect(trigger).toHaveTextContent("+1");
+  });
+
+  it("allowPattern blocks keystrokes that would break the pattern", async () => {
+    render(<Input aria-label="PIN" allowPattern={/^\d*$/} />);
+    const field = screen.getByRole("textbox", { name: "PIN" });
+    await userEvent.type(field, "12ab34cd");
+    expect(field).toHaveValue("1234");
+  });
+
+  it("allowPattern still lets the field be cleared", async () => {
+    render(<Input aria-label="PIN" allowPattern={/^\d*$/} defaultValue="4821" />);
+    const field = screen.getByRole("textbox", { name: "PIN" });
+    await userEvent.clear(field);
+    expect(field).toHaveValue("");
+  });
+
+  it("allowPattern only fires onChange for accepted values", async () => {
+    const seen: string[] = [];
+    render(
+      <Input
+        aria-label="PIN"
+        allowPattern={/^\d*$/}
+        onChange={(e) => seen.push(e.currentTarget.value)}
+      />,
+    );
+    const field = screen.getByRole("textbox", { name: "PIN" });
+    await userEvent.type(field, "1a2");
+    expect(seen).toEqual(["1", "12"]);
+    expect(field).toHaveValue("12");
+  });
+
+  it("allowPattern supports fractional constraints and works with a controlled value", async () => {
+    const user = userEvent.setup();
+    function Host() {
+      const [v, setV] = useState("");
+      return (
+        <Input
+          aria-label="Amount"
+          allowPattern={/^\d*\.?\d{0,2}$/}
+          value={v}
+          onChange={(e) => setV(e.target.value)}
+        />
+      );
+    }
+    render(<Host />);
+    const field = screen.getByRole("textbox", { name: "Amount" });
+    await user.type(field, "12.345");
+    expect(field).toHaveValue("12.34");
   });
 });

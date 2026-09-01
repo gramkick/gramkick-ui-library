@@ -43,4 +43,16 @@
   --shadow-art: 0 18px 40px rgb(29 71 47 / 12%);
   --shadow-modal: 0 24px 60px rgb(11 41 27 / 28%);
   --shadow-card: 0 10px 30px rgb(16 35 58 / 5%);
+
+  /* motion — the left-to-right skeleton sweep */
+  --animate-skeleton-shimmer: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

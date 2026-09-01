@@ -159,3 +159,145 @@ function PasswordField() {
 export const PasswordReveal: Story = {
   render: () => <PasswordField />,
 };
+
+const dialCodes = [
+  { value: "+91", label: "India +91", triggerLabel: "🇮🇳 +91" },
+  { value: "+1", label: "United States +1", triggerLabel: "🇺🇸 +1" },
+  { value: "+44", label: "United Kingdom +44", triggerLabel: "🇬🇧 +44" },
+  { value: "+61", label: "Australia +61", triggerLabel: "🇦🇺 +61" },
+  { value: "+971", label: "UAE +971", triggerLabel: "🇦🇪 +971" },
+];
+
+/** A dropdown docked to the left edge — e.g. a country dial code before a phone number. */
+export const WithSelectAddon: Story = {
+  render: (args) => (
+    <div className="w-80">
+      <Input
+        {...args}
+        label="Phone number"
+        placeholder="98765 43210"
+        inputMode="tel"
+        leftSelect={{
+          options: dialCodes,
+          defaultValue: "+91",
+          "aria-label": "Country dial code",
+          menuWidth: "auto",
+        }}
+      />
+    </div>
+  ),
+};
+
+function ControlledAddon() {
+  const [unit, setUnit] = useState("kg");
+  const [amount, setAmount] = useState("");
+  return (
+    <div className="w-80">
+      <Input
+        label="Package weight"
+        placeholder="0.00"
+        inputMode="decimal"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        rightSelect={{
+          options: [
+            { value: "kg", label: "Kilograms", triggerLabel: "kg" },
+            { value: "g", label: "Grams", triggerLabel: "g" },
+            { value: "lb", label: "Pounds", triggerLabel: "lb" },
+          ],
+          value: unit,
+          onChange: setUnit,
+          "aria-label": "Weight unit",
+          menuWidth: "trigger",
+        }}
+      />
+      <p className="mt-2 text-sm text-muted">
+        {amount || "—"} {unit}
+      </p>
+    </div>
+  );
+}
+
+/** A dropdown docked to the right edge, controlled alongside the field value. */
+export const SelectAddonRight: Story = { render: () => <ControlledAddon /> };
+
+/** Addons on both edges, and the whole group inherits `invalid` / `disabled`. */
+export const SelectAddonBothSides: Story = {
+  render: (args) => (
+    <div className="flex w-96 flex-col gap-4">
+      <Input
+        {...args}
+        label="Price range"
+        placeholder="1000"
+        inputMode="decimal"
+        leftSelect={{
+          options: [
+            { value: "inr", label: "Indian Rupee", triggerLabel: "₹" },
+            { value: "usd", label: "US Dollar", triggerLabel: "$" },
+          ],
+          defaultValue: "inr",
+          "aria-label": "Currency",
+          menuWidth: "auto",
+        }}
+        rightSelect={{
+          options: [
+            { value: "day", label: "per day", triggerLabel: "/ day" },
+            { value: "week", label: "per week", triggerLabel: "/ week" },
+            { value: "month", label: "per month", triggerLabel: "/ month" },
+          ],
+          defaultValue: "day",
+          "aria-label": "Billing period",
+        }}
+      />
+      <Input
+        {...args}
+        label="Invalid example"
+        defaultValue="abc"
+        invalid
+        error="Enter a numeric amount."
+        leftSelect={{
+          options: [
+            { value: "inr", label: "Indian Rupee", triggerLabel: "₹" },
+            { value: "usd", label: "US Dollar", triggerLabel: "$" },
+          ],
+          defaultValue: "inr",
+          "aria-label": "Currency",
+        }}
+      />
+    </div>
+  ),
+};
+
+/**
+ * `allowPattern` rejects any edit (typing, paste, autofill) whose *resulting
+ * value* fails the regex — the field simply keeps its previous value. Anchor the
+ * pattern against the whole value.
+ */
+export const RegexFiltered: Story = {
+  render: (args) => (
+    <div className="flex w-72 flex-col gap-4">
+      <Input {...args} label="OTP (digits only)" placeholder="000000" allowPattern={/^\d*$/} />
+      <Input
+        {...args}
+        label="Amount (max 2 decimals)"
+        placeholder="0.00"
+        inputMode="decimal"
+        allowPattern={/^\d*\.?\d{0,2}$/}
+      />
+      <Input
+        {...args}
+        label="Slug (a–z, 0–9, -)"
+        placeholder="my-store"
+        allowPattern={/^[a-z0-9-]*$/}
+      />
+      <Input
+        {...args}
+        label="Phone"
+        placeholder="9876543210"
+        inputMode="tel"
+        allowPattern={/^\d*$/}
+        leftSelect={{ options: dialCodes, defaultValue: "+91", "aria-label": "Country dial code" }}
+      />
+    </div>
+  ),
+};

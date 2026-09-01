@@ -1,6 +1,17 @@
-import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from "react";
+import {
+  forwardRef,
+  useId,
+  useMemo,
+  useRef,
+  type ChangeEvent,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
+import { InputSelect, type InputSelectConfig, type InputSelectOption } from "./input-select";
+
+export type { InputSelectConfig, InputSelectOption };
 
 export const inputVariants = cva(
   [
@@ -57,6 +68,18 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> &
     leftIcon?: ReactNode;
     /** Element inside the field, on the right — may be interactive (clear / reveal button). */
     rightIcon?: ReactNode;
+    /** Dropdown addon docked to the left edge (e.g. a country-code picker). */
+    leftSelect?: InputSelectConfig;
+    /** Dropdown addon docked to the right edge (e.g. a unit picker). */
+    rightSelect?: InputSelectConfig;
+    /**
+     * Keystroke filter. An edit (typing, paste, drop, autofill) is applied only
+     * when the resulting value matches this pattern — otherwise it's rejected and
+     * the field keeps its previous value. Empty is always allowed so the field
+     * can be cleared. Anchor the pattern against the whole value, e.g.
+     * `/^\d*$/` (digits only) or `/^\d*\.?\d{0,2}$/` (up to 2 decimals).
+     */
+    allowPattern?: RegExp;
     /** Force the error styling without an `error` message. */
     invalid?: boolean;
     /** Classes for the outer wrapper (label + field + hint/error). */
@@ -67,7 +90,10 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> &
  * Text field. Optional `label` / `hint` / `error` wrap it in an accessible group
  * (`aria-describedby`, `aria-invalid` are wired up); `leftIcon` / `rightIcon` sit
  * inside the field; `size` and `variant` control the shape; `disabled` and
- * `readOnly` get distinct styling with hover suppressed.
+ * `readOnly` get distinct styling with hover suppressed. `leftSelect` /
+ * `rightSelect` dock a from-scratch dropdown to either edge (country codes,
+ * units, …), joined seamlessly with the field. `allowPattern` restricts what can
+ * be typed / pasted to values matching a regex.
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   {
@@ -81,11 +107,17 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     error,
     leftIcon,
     rightIcon,
+    leftSelect,
+    rightSelect,
+    allowPattern,
     invalid,
     required,
     disabled,
     readOnly,
     type = "text",
+    value,
+    defaultValue,
+    onChange,
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
     ...props
@@ -105,6 +137,83 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       .filter(Boolean)
       .join(" ") || undefined;
 
+  const hasLeftSelect = leftSelect != null;
+  const hasRightSelect = rightSelect != null;
+
+  // Drop stateful flags (`g` / `y`) so `.test()` is position-independent.
+  const filterRe = useMemo(
+    () =>
+      allowPattern
+        ? new RegExp(allowPattern.source, allowPattern.flags.replace(/[gy]/g, ""))
+        : null,
+    [allowPattern],
+  );
+  const lastAcceptedRef = useRef(
+    value != null ? String(value) : defaultValue != null ? String(defaultValue) : "",
+  );
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const next = event.target.value;
+    if (filterRe && next !== "" && !filterRe.test(next)) {
+      // Reject the edit: restore the last value that passed (covers uncontrolled;
+      // controlled fields snap back on the skipped re-render anyway).
+      event.target.value = lastAcceptedRef.current;
+      return;
+    }
+    lastAcceptedRef.current = next;
+    onChange?.(event);
+  };
+
+  const leftIconEl =
+    leftIcon != null ? (
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center text-muted",
+          iconGutter[resolvedSize].box,
+        )}
+      >
+        {leftIcon}
+      </span>
+    ) : null;
+
+  const rightIconEl =
+    rightIcon != null ? (
+      <span
+        className={cn(
+          "absolute inset-y-0 right-0 flex items-center justify-center text-muted",
+          iconGutter[resolvedSize].box,
+        )}
+      >
+        {rightIcon}
+      </span>
+    ) : null;
+
+  const inputEl = (
+    <input
+      ref={ref}
+      id={id}
+      type={type}
+      required={required}
+      disabled={disabled}
+      readOnly={readOnly}
+      aria-invalid={isInvalid || undefined}
+      aria-describedby={describedBy}
+      value={value}
+      defaultValue={defaultValue}
+      onChange={handleChange}
+      className={cn(
+        inputVariants({ variant, size }),
+        leftIcon != null && iconGutter[resolvedSize].padLeft,
+        rightIcon != null && iconGutter[resolvedSize].padRight,
+        hasLeftSelect && "rounded-l-none border-l-0",
+        hasRightSelect && "rounded-r-none border-r-0",
+        className,
+      )}
+      {...props}
+    />
+  );
+
   return (
     <div className={cn("flex flex-col gap-1.5", containerClassName)}>
       {label != null ? (
@@ -117,48 +226,43 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         </label>
       ) : null}
 
-      <div className="relative">
-        {leftIcon != null ? (
-          <span
-            aria-hidden="true"
-            className={cn(
-              "pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center text-muted",
-              iconGutter[resolvedSize].box,
-            )}
-          >
-            {leftIcon}
-          </span>
-        ) : null}
+      {hasLeftSelect || hasRightSelect ? (
+        <div className="flex items-stretch">
+          {hasLeftSelect ? (
+            <InputSelect
+              {...leftSelect}
+              side="left"
+              size={resolvedSize}
+              variant={variant ?? "outline"}
+              invalid={isInvalid}
+              disabled={disabled || leftSelect.disabled}
+            />
+          ) : null}
 
-        <input
-          ref={ref}
-          id={id}
-          type={type}
-          required={required}
-          disabled={disabled}
-          readOnly={readOnly}
-          aria-invalid={isInvalid || undefined}
-          aria-describedby={describedBy}
-          className={cn(
-            inputVariants({ variant, size }),
-            leftIcon != null && iconGutter[resolvedSize].padLeft,
-            rightIcon != null && iconGutter[resolvedSize].padRight,
-            className,
-          )}
-          {...props}
-        />
+          <div className="relative flex min-w-0 flex-1 items-center">
+            {leftIconEl}
+            {inputEl}
+            {rightIconEl}
+          </div>
 
-        {rightIcon != null ? (
-          <span
-            className={cn(
-              "absolute inset-y-0 right-0 flex items-center justify-center text-muted",
-              iconGutter[resolvedSize].box,
-            )}
-          >
-            {rightIcon}
-          </span>
-        ) : null}
-      </div>
+          {hasRightSelect ? (
+            <InputSelect
+              {...rightSelect}
+              side="right"
+              size={resolvedSize}
+              variant={variant ?? "outline"}
+              invalid={isInvalid}
+              disabled={disabled || rightSelect.disabled}
+            />
+          ) : null}
+        </div>
+      ) : (
+        <div className="relative">
+          {leftIconEl}
+          {inputEl}
+          {rightIconEl}
+        </div>
+      )}
 
       {error != null ? (
         <p id={errorId} className="text-xs text-danger">
