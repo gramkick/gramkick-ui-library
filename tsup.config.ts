@@ -19,10 +19,13 @@ export default defineConfig({
   format: ["esm"],
   target: "es2022",
   dts: true,
-  sourcemap: true,
+  // No source maps in the published package — consumers debug their own app, not
+  // the library internals; run the build locally if you need to step into it.
+  sourcemap: false,
   clean: true,
   treeshake: true,
-  minify: false,
+  // Minify the runtime files. JSDoc still reaches editors via the `.d.ts`.
+  minify: true,
   splitting: true,
   external: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
 });
