@@ -131,6 +131,41 @@ export const SelectAll: Story = {
   },
 };
 
+export const Categories: Story = {
+  args: {
+    label: "Add product",
+    isCategoriesList: true,
+    searchable: true,
+    placeholder: "Pick an item…",
+    options: {
+      "Food & oil": [
+        { value: "ghee", label: "Ghee", tertiary: "1 kg" },
+        { value: "sunflower-oil", label: "Sunflower oil", tertiary: "1 L" },
+        { value: "mustard-oil", label: "Mustard oil", tertiary: "1 L" },
+      ],
+      "Rice & grain": [
+        { value: "basmati", label: "Basmati rice", tertiary: "5 kg" },
+        { value: "sona-masoori", label: "Sona Masoori rice", tertiary: "10 kg" },
+        { value: "wheat", label: "Whole wheat", tertiary: "10 kg", disabled: true },
+      ],
+      "Pulses & dals": [
+        { value: "toor", label: "Toor dal", tertiary: "1 kg" },
+        { value: "moong", label: "Moong dal", tertiary: "1 kg" },
+        { value: "chana", label: "Chana dal", tertiary: "1 kg" },
+      ],
+    },
+  },
+};
+
+export const CategoriesMultiple: Story = {
+  args: {
+    ...Categories.args,
+    multiple: true,
+    selectAll: true,
+    label: "Restock items",
+  },
+};
+
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">

@@ -132,4 +132,31 @@ describe("ListItems", () => {
     render(<ListItems options={[]} aria-label="Fruit" emptyMessage="Nothing here" />);
     expect(screen.getByText("Nothing here")).toBeInTheDocument();
   });
+
+  it("renders category headings and still selects across groups when isCategoriesList", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <ListItems
+        aria-label="Catalogue"
+        isCategoriesList
+        onChange={onChange}
+        options={{
+          "Food & oil": [
+            { value: "ghee", label: "Ghee" },
+            { value: "oil", label: "Sunflower oil" },
+          ],
+          "Rice & grain": [{ value: "basmati", label: "Basmati rice" }],
+        }}
+      />,
+    );
+    const list = screen.getByRole("listbox", { name: "Catalogue" });
+    // headings are presentational, not options
+    expect(within(list).getByText("Food & oil")).toBeInTheDocument();
+    expect(within(list).getByText("Rice & grain")).toBeInTheDocument();
+    expect(within(list).getAllByRole("option")).toHaveLength(3);
+
+    await user.click(screen.getByRole("option", { name: "Basmati rice" }));
+    expect(onChange).toHaveBeenLastCalledWith("basmati");
+  });
 });

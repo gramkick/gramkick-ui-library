@@ -11,10 +11,12 @@ import {
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
 import { useControllableState } from "../../hooks/use-controllable-state";
-import type { DropdownOption } from "../dropdown/dropdown";
+import { toOptionGroups, type DropdownOption, type DropdownCategories } from "../dropdown/dropdown";
 
 /** Same shape as a `Dropdown` option. */
 export type ListItem = DropdownOption;
+/** Grouped rows, keyed by category name — used with `isCategoriesList`. */
+export type ListItemCategories = DropdownCategories;
 
 function TickIcon({ className }: { className?: string }) {
   return (
@@ -55,11 +57,19 @@ const SIZES: Record<ListItemsSize, { option: string; optionText: string; icon: s
 type Value = string | string[] | null;
 
 type NavRow =
-  { kind: "all"; disabled: false } | { kind: "option"; option: ListItem; disabled: boolean };
+  | { kind: "all"; disabled: false }
+  | { kind: "group"; label: ReactNode; disabled: true }
+  | { kind: "option"; option: ListItem; disabled: boolean; optionIndex: number };
 
 export interface ListItemsProps extends VariantProps<typeof listItemsVariants> {
-  /** Rows to render — `label` / `subtext` / `tertiary` (right) / `icon` (left), any a node, plus `disabled`. */
-  options: ListItem[];
+  /**
+   * Rows to render — `label` / `subtext` / `tertiary` (right) / `icon` (left),
+   * any a node, plus `disabled`. With `isCategoriesList`, pass an object keyed by
+   * category name instead: `{ "Food & oil": [...], "Rice & grain": [...] }`.
+   */
+  options: ListItem[] | ListItemCategories;
+  /** Treat `options` as `{ category: ListItem[] }` and render grouped headings. */
+  isCategoriesList?: boolean;
   size?: ListItemsSize;
   /** Checkbox rows; selection is a `string[]`. */
   multiple?: boolean;
@@ -95,6 +105,7 @@ export interface ListItemsProps extends VariantProps<typeof listItemsVariants> {
  */
 export function ListItems({
   options,
+  isCategoriesList = false,
   variant,
   size = "md",
   multiple = false,
@@ -132,22 +143,30 @@ export function ListItems({
     [multiple, setRawValue],
   );
 
-  const showSelectAll = selectable && multiple && selectAll && options.length > 0;
-  const navRows = useMemo<NavRow[]>(
-    () => [
-      ...(showSelectAll ? [{ kind: "all", disabled: false } as NavRow] : []),
-      ...options.map<NavRow>((option) => ({
-        kind: "option",
-        option,
-        disabled: Boolean(option.disabled),
-      })),
-    ],
-    [showSelectAll, options],
+  const groups = useMemo(
+    () => toOptionGroups(options, isCategoriesList),
+    [options, isCategoriesList],
   );
+  const flatOptions = useMemo(() => groups.flatMap((g) => g.options), [groups]);
+
+  const showSelectAll = selectable && multiple && selectAll && flatOptions.length > 0;
+  const navRows = useMemo<NavRow[]>(() => {
+    const rows: NavRow[] = [];
+    if (showSelectAll) rows.push({ kind: "all", disabled: false });
+    let optionIndex = 0;
+    for (const g of groups) {
+      if (g.label != null) rows.push({ kind: "group", label: g.label, disabled: true });
+      for (const option of g.options) {
+        rows.push({ kind: "option", option, disabled: Boolean(option.disabled), optionIndex });
+        optionIndex += 1;
+      }
+    }
+    return rows;
+  }, [showSelectAll, groups]);
 
   const enabledValues = useMemo(
-    () => options.filter((o) => !o.disabled).map((o) => o.value),
-    [options],
+    () => flatOptions.filter((o) => !o.disabled).map((o) => o.value),
+    [flatOptions],
   );
   const allChecked =
     enabledValues.length > 0 && enabledValues.every((v) => selectedValues.includes(v));
@@ -188,12 +207,12 @@ export function ListItems({
   }, [enabledValues, allChecked, selectedValues, commit]);
 
   const activateRow = useCallback(
-    (row: NavRow | undefined, index: number) => {
+    (row: NavRow | undefined) => {
       if (!row || row.disabled) return;
       if (row.kind === "all") toggleAll();
-      else selectOption(row.option, index - (showSelectAll ? 1 : 0));
+      else if (row.kind === "option") selectOption(row.option, row.optionIndex);
     },
-    [toggleAll, selectOption, showSelectAll],
+    [toggleAll, selectOption],
   );
 
   const moveActive = useCallback(
@@ -238,7 +257,7 @@ export function ListItems({
       case " ":
         if (activeIndex >= 0 && navRows[activeIndex]) {
           e.preventDefault();
-          activateRow(navRows[activeIndex], activeIndex);
+          activateRow(navRows[activeIndex]);
         }
         break;
       default:
@@ -280,85 +299,103 @@ export function ListItems({
         )}
         style={maxHeight && Number.isFinite(maxHeight) ? { maxHeight } : undefined}
       >
-        {navRows.length === 0 ? (
+        {!navRows.some((r) => r.kind === "option") ? (
           <li role="presentation" className="px-3 py-6 text-center text-sm text-muted">
             {emptyMessage}
           </li>
         ) : (
-          navRows.map((row, i) => {
-            const active = i === activeIndex;
-            if (row.kind === "all") {
+          (() => {
+            const firstGroupIndex = navRows.findIndex((r) => r.kind === "group");
+            return navRows.map((row, i) => {
+              const active = i === activeIndex;
+              if (row.kind === "group") {
+                return (
+                  <li
+                    key={`group-${i}`}
+                    role="presentation"
+                    className={cn(
+                      "px-3 pb-1 pt-2.5 text-xs font-semibold uppercase tracking-wide text-muted",
+                      // divider only *between* groups, never above the first one
+                      i > firstGroupIndex && "mt-1 border-t border-line",
+                    )}
+                  >
+                    {row.label}
+                  </li>
+                );
+              }
+              if (row.kind === "all") {
+                return (
+                  <li
+                    key="__all__"
+                    id={`${id}-row-${i}`}
+                    role="option"
+                    aria-selected={allChecked}
+                    ref={(n) => {
+                      rowRefs.current[i] = n;
+                    }}
+                    onMouseEnter={() => setActiveIndex(i)}
+                    onClick={() => toggleAll()}
+                    className={cn(
+                      "flex cursor-pointer items-center border-b border-line font-medium",
+                      sz.option,
+                      sz.optionText,
+                      active && "bg-mint",
+                    )}
+                  >
+                    {checkboxBox(allChecked, someChecked)}
+                    <span className="flex-1 text-ink">{selectAllLabel}</span>
+                  </li>
+                );
+              }
+
+              const o = row.option;
+              const isSelected = selectable && selectedValues.includes(o.value);
               return (
                 <li
-                  key="__all__"
+                  key={o.value}
                   id={`${id}-row-${i}`}
                   role="option"
-                  aria-selected={allChecked}
+                  aria-selected={selectable ? isSelected : undefined}
+                  aria-disabled={o.disabled || undefined}
                   ref={(n) => {
                     rowRefs.current[i] = n;
                   }}
-                  onMouseEnter={() => setActiveIndex(i)}
-                  onClick={() => toggleAll()}
+                  onMouseEnter={() => !o.disabled && setActiveIndex(i)}
+                  onClick={() => selectOption(o, row.optionIndex)}
                   className={cn(
-                    "flex cursor-pointer items-center border-b border-line font-medium",
+                    "flex cursor-pointer items-center",
                     sz.option,
                     sz.optionText,
-                    active && "bg-mint",
+                    sz.icon,
+                    o.disabled && "cursor-not-allowed opacity-50",
+                    active && !o.disabled && "bg-mint",
+                    isSelected && !active && "bg-mint/50",
                   )}
                 >
-                  {checkboxBox(allChecked, someChecked)}
-                  <span className="flex-1 text-ink">{selectAllLabel}</span>
+                  {selectable && multiple ? checkboxBox(Boolean(isSelected)) : null}
+
+                  {o.icon ? <span className="flex shrink-0 text-muted">{o.icon}</span> : null}
+
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium text-ink">{o.label}</span>
+                    {o.subtext != null ? (
+                      <span className="mt-0.5 block truncate text-xs font-normal text-muted">
+                        {o.subtext}
+                      </span>
+                    ) : null}
+                  </span>
+
+                  {o.tertiary != null ? (
+                    <span className="shrink-0 pl-2 text-xs text-muted">{o.tertiary}</span>
+                  ) : null}
+
+                  {selectable && !multiple && isSelected ? (
+                    <TickIcon className="ml-1 size-4 shrink-0 text-leaf" />
+                  ) : null}
                 </li>
               );
-            }
-
-            const o = row.option;
-            const isSelected = selectable && selectedValues.includes(o.value);
-            return (
-              <li
-                key={o.value}
-                id={`${id}-row-${i}`}
-                role="option"
-                aria-selected={selectable ? isSelected : undefined}
-                aria-disabled={o.disabled || undefined}
-                ref={(n) => {
-                  rowRefs.current[i] = n;
-                }}
-                onMouseEnter={() => !o.disabled && setActiveIndex(i)}
-                onClick={() => selectOption(o, options.indexOf(o))}
-                className={cn(
-                  "flex cursor-pointer items-center",
-                  sz.option,
-                  sz.optionText,
-                  sz.icon,
-                  o.disabled && "cursor-not-allowed opacity-50",
-                  active && !o.disabled && "bg-mint",
-                  isSelected && !active && "bg-mint/50",
-                )}
-              >
-                {selectable && multiple ? checkboxBox(Boolean(isSelected)) : null}
-
-                {o.icon ? <span className="flex shrink-0 text-muted">{o.icon}</span> : null}
-
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium text-ink">{o.label}</span>
-                  {o.subtext != null ? (
-                    <span className="mt-0.5 block truncate text-xs font-normal text-muted">
-                      {o.subtext}
-                    </span>
-                  ) : null}
-                </span>
-
-                {o.tertiary != null ? (
-                  <span className="shrink-0 pl-2 text-xs text-muted">{o.tertiary}</span>
-                ) : null}
-
-                {selectable && !multiple && isSelected ? (
-                  <TickIcon className="ml-1 size-4 shrink-0 text-leaf" />
-                ) : null}
-              </li>
-            );
-          })
+            });
+          })()
         )}
       </ul>
     </div>

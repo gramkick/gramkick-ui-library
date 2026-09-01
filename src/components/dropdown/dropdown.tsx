@@ -78,6 +78,28 @@ export interface DropdownOption {
   [key: string]: unknown;
 }
 
+/** Grouped options: `{ "Food & oil": [...], "Rice & grain": [...] }`. Used when
+ *  `isCategoriesList` is set. */
+export type DropdownCategories = Record<string, DropdownOption[]>;
+
+export type DropdownOptions = DropdownOption[] | DropdownCategories;
+
+/**
+ * Normalize flat-or-grouped options into an ordered list of groups. A plain
+ * array (or `grouped` off) collapses to a single unlabeled group, so callers can
+ * treat every list the same way.
+ */
+export function toOptionGroups(
+  options: DropdownOptions,
+  grouped: boolean,
+): { label: string | null; options: DropdownOption[] }[] {
+  if (grouped && !Array.isArray(options)) {
+    return Object.entries(options).map(([label, opts]) => ({ label, options: opts ?? [] }));
+  }
+  const flat = Array.isArray(options) ? options : Object.values(options).flat();
+  return [{ label: null, options: flat }];
+}
+
 export const dropdownTriggerVariants = cva(
   [
     "flex w-full items-center rounded-gk-md text-ink shadow-xs transition-[color,background-color,border-color,box-shadow]",
@@ -140,10 +162,15 @@ const MAX_MENU_HEIGHT = 320;
 type Value = string | string[] | null;
 
 type NavRow =
-  { kind: "all"; disabled: false } | { kind: "option"; option: DropdownOption; disabled: boolean };
+  | { kind: "all"; disabled: false }
+  | { kind: "group"; label: ReactNode; disabled: true }
+  | { kind: "option"; option: DropdownOption; disabled: boolean };
 
 export interface DropdownProps extends VariantProps<typeof dropdownTriggerVariants> {
-  options: DropdownOption[];
+  /** Flat list, or — with `isCategoriesList` — an object keyed by category name. */
+  options: DropdownOptions;
+  /** Treat `options` as `{ category: DropdownOption[] }` and render grouped headings. */
+  isCategoriesList?: boolean;
   /** Enable multi-select — options render with a checkbox and selections show as chips. */
   multiple?: boolean;
   /** Controlled value. `string` (single) or `string[]` (multiple). */
@@ -202,6 +229,7 @@ const asText = (v: unknown): string =>
  */
 export function Dropdown({
   options,
+  isCategoriesList = false,
   multiple = false,
   value: valueProp,
   defaultValue,
@@ -273,33 +301,49 @@ export function Dropdown({
 
   const query = search.trim().toLowerCase();
   const keys = useMemo(() => searchKeys ?? ["label", "value"], [searchKeys]);
-  const filtered = useMemo(() => {
-    if (!searchable || !query) return options;
-    return options.filter((o) => keys.some((k) => asText(o[k]).toLowerCase().includes(query)));
-  }, [options, searchable, query, keys]);
+
+  const groups = useMemo(
+    () => toOptionGroups(options, isCategoriesList),
+    [options, isCategoriesList],
+  );
+  const flatOptions = useMemo(() => groups.flatMap((g) => g.options), [groups]);
+
+  // Filter within each group and drop the ones left empty.
+  const filteredGroups = useMemo(() => {
+    if (!searchable || !query) return groups;
+    return groups
+      .map((g) => ({
+        label: g.label,
+        options: g.options.filter((o) =>
+          keys.some((k) => asText(o[k]).toLowerCase().includes(query)),
+        ),
+      }))
+      .filter((g) => g.options.length > 0);
+  }, [groups, searchable, query, keys]);
+  const filtered = useMemo(() => filteredGroups.flatMap((g) => g.options), [filteredGroups]);
 
   const selectedOptions = useMemo(
     () =>
       selectedValues
-        .map((v) => options.find((o) => o.value === v))
+        .map((v) => flatOptions.find((o) => o.value === v))
         .filter(Boolean) as DropdownOption[],
-    [selectedValues, options],
+    [selectedValues, flatOptions],
   );
   const singleOption = !multiple ? selectedOptions[0] : undefined;
 
-  // Navigable rows: an optional "select all" row followed by the filtered options.
+  // Navigable rows: an optional "select all" row, then each group's heading + options.
   const showSelectAll = multiple && selectAll && filtered.length > 0;
-  const navRows = useMemo<NavRow[]>(
-    () => [
-      ...(showSelectAll ? [{ kind: "all", disabled: false } as NavRow] : []),
-      ...filtered.map<NavRow>((option) => ({
-        kind: "option",
-        option,
-        disabled: Boolean(option.disabled),
-      })),
-    ],
-    [showSelectAll, filtered],
-  );
+  const navRows = useMemo<NavRow[]>(() => {
+    const rows: NavRow[] = [];
+    if (showSelectAll) rows.push({ kind: "all", disabled: false });
+    for (const g of filteredGroups) {
+      if (g.label != null) rows.push({ kind: "group", label: g.label, disabled: true });
+      for (const option of g.options) {
+        rows.push({ kind: "option", option, disabled: Boolean(option.disabled) });
+      }
+    }
+    return rows;
+  }, [showSelectAll, filteredGroups]);
 
   const enabledFilteredValues = useMemo(
     () => filtered.filter((o) => !o.disabled).map((o) => o.value),
@@ -656,13 +700,29 @@ export function Dropdown({
               aria-labelledby={label != null ? labelId : undefined}
               className="max-h-[320px] overflow-y-auto py-1"
             >
-              {navRows.length === 0 ? (
+              {!navRows.some((r) => r.kind === "option") ? (
                 <li role="presentation" className="px-3 py-6 text-center text-sm text-muted">
                   {emptyMessage}
                 </li>
               ) : (
                 navRows.map((row, i) => {
                   const active = i === activeIndex;
+                  if (row.kind === "group") {
+                    const firstGroupIndex = navRows.findIndex((r) => r.kind === "group");
+                    return (
+                      <li
+                        key={`group-${i}`}
+                        role="presentation"
+                        className={cn(
+                          "px-3 pb-1 pt-2.5 text-xs font-semibold uppercase tracking-wide text-muted",
+                          // divider only *between* groups, never above the first one
+                          i > firstGroupIndex && "mt-1 border-t border-line",
+                        )}
+                      >
+                        {row.label}
+                      </li>
+                    );
+                  }
                   if (row.kind === "all") {
                     return (
                       <li

@@ -57,6 +57,37 @@ describe("Dropdown", () => {
     expect(within(screen.getByRole("combobox")).getByText("Bengaluru")).toBeInTheDocument();
   });
 
+  it("isCategoriesList: renders grouped headings, filters groups on search, selects across them", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <Dropdown
+        label="Catalogue"
+        isCategoriesList
+        searchable
+        onChange={onChange}
+        options={{
+          "Food & oil": [
+            { value: "ghee", label: "Ghee" },
+            { value: "oil", label: "Sunflower oil" },
+          ],
+          "Rice & grain": [{ value: "basmati", label: "Basmati rice" }],
+        }}
+      />,
+    );
+    const list = await open(user);
+    expect(within(list).getByText("Food & oil")).toBeInTheDocument();
+    expect(within(list).getByText("Rice & grain")).toBeInTheDocument();
+    expect(within(list).getAllByRole("option")).toHaveLength(3);
+
+    await user.type(screen.getByRole("textbox", { name: "Search options" }), "rice");
+    expect(within(list).queryByText("Food & oil")).not.toBeInTheDocument();
+    expect(within(list).getByText("Rice & grain")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("option", { name: "Basmati rice" }));
+    expect(onChange).toHaveBeenCalledWith("basmati");
+  });
+
   it("multi select: stays open, toggles, shows chips, fires onChange with an array", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

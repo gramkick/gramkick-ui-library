@@ -72,6 +72,35 @@ export const Multiple: Story = {
   args: { multiple: true, selectAll: true, defaultValue: ["asha"] },
 };
 
+const catalogue = {
+  "Food & oil": [
+    { value: "ghee", label: "Ghee", tertiary: "1 kg" },
+    { value: "sunflower-oil", label: "Sunflower oil", tertiary: "1 L" },
+  ],
+  "Rice & grain": [
+    { value: "basmati", label: "Basmati rice", tertiary: "5 kg" },
+    { value: "sona-masoori", label: "Sona Masoori rice", tertiary: "10 kg" },
+  ],
+  "Pulses & dals": [
+    { value: "toor", label: "Toor dal", tertiary: "1 kg" },
+    { value: "moong", label: "Moong dal", tertiary: "1 kg", disabled: true },
+  ],
+};
+
+export const Categories: Story = {
+  args: { isCategoriesList: true, options: catalogue, "aria-label": "Catalogue" },
+};
+
+export const CategoriesMultiple: Story = {
+  args: {
+    isCategoriesList: true,
+    options: catalogue,
+    "aria-label": "Catalogue",
+    multiple: true,
+    selectAll: true,
+  },
+};
+
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">
