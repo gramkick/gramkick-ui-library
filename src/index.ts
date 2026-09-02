@@ -27,3 +27,7 @@ export * from "./components/tooltip";
 export * from "./components/toast";
 export * from "./components/dialog";
 export * from "./components/tabs";
+
+// Hooks are also available on the `@gramkick/ui/hooks` subpath; re-exported here
+// so a consumer can import everything from the package root.
+export * from "./hooks";

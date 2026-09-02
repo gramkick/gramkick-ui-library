@@ -88,8 +88,10 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
  * - `loading` — shows a spinner and blocks interaction. Without `loadingText` the
  *   label is kept in place but visually hidden so the button never changes width;
  *   with `loadingText` the spinner + text render inline.
- * - `asChild` renders the child as-is (Radix `Slot`); the icon / loading props then
- *   do nothing because there is no `<button>` to compose.
+ * - `asChild` renders the child as-is (Radix `Slot`); `leftIcon` / `rightIcon` /
+ *   `loadingText` are no-ops (there is no `<button>` to compose), and `loading`
+ *   only marks the element busy + non-interactive — no spinner is injected, so
+ *   put one in the child yourself if you need it.
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
@@ -114,7 +116,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 
   if (asChild) {
     return (
-      <Slot ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props}>
+      <Slot
+        ref={ref}
+        className={cn(buttonVariants({ variant, size }), loading && "pointer-events-none opacity-70", className)}
+        aria-busy={loading || undefined}
+        aria-disabled={loading || undefined}
+        data-loading={loading || undefined}
+        {...props}
+      >
         {labelNode}
       </Slot>
     );
