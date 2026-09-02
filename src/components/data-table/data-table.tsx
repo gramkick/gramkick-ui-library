@@ -883,16 +883,26 @@ export function DataTable<T>({
         // A single `minmax(0,1fr)` grid track pins every child (header, body, footer)
         // to the card width, so a wide table scrolls *inside* the scroll region
         // instead of stretching the card — even in a flex / grid / inline parent.
-        "grid w-full min-w-0 grid-cols-[minmax(0,1fr)] overflow-hidden rounded-gk-lg border border-line bg-canvas",
+        // No `overflow-hidden` here: it would clip a footer control's popup (the
+        // page-size menu) when the table is short. Corner-clipping lives on the
+        // inner wrapper instead, which stops above the footer.
+        "grid w-full min-w-0 grid-cols-[minmax(0,1fr)] rounded-gk-lg border border-line bg-canvas",
         className,
       )}
     >
-      {banner}
       <div
-        ref={scrollRef}
-        data-slot="data-table-scroll"
-        data-scrolled-x={edge.left || undefined}
-        className={cn("min-w-0 overflow-x-auto", maxHeight && "overflow-y-auto")}
+        data-slot="data-table-clip"
+        className={cn(
+          "grid min-w-0 grid-cols-[minmax(0,1fr)] overflow-hidden rounded-t-[inherit]",
+          !showFooter && "rounded-b-[inherit]",
+        )}
+      >
+        {banner}
+        <div
+          ref={scrollRef}
+          data-slot="data-table-scroll"
+          data-scrolled-x={edge.left || undefined}
+          className={cn("min-w-0 overflow-x-auto", maxHeight && "overflow-y-auto")}
         style={scrollStyle}
       >
         <table aria-label={ariaLabel} className={cn(dataTableVariants({ variant, size }))}>
@@ -1037,6 +1047,7 @@ export function DataTable<T>({
                   : bodyRows}
           </tbody>
         </table>
+        </div>
       </div>
 
       {loading ? footerSkeleton : footer}

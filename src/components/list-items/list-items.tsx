@@ -67,6 +67,11 @@ export interface ListItemsProps extends VariantProps<typeof listItemsVariants> {
   onItemClick?: (option: ListItem, index: number) => void;
   /** `false` = display-only: no selected state / checkboxes / ticks (rows still fire `onItemClick`). */
   selectable?: boolean;
+  /**
+   * ARIA role for the list. `"listbox"` (default) with `role="option"` rows, or
+   * `"menu"` with `role="menuitem"` rows for an action menu (no selected state).
+   */
+  role?: "listbox" | "menu";
   /** Multi-select only — a "select all" row that toggles every enabled option. */
   selectAll?: boolean;
   selectAllLabel?: ReactNode;
@@ -100,6 +105,7 @@ export function ListItems({
   onChange,
   onItemClick,
   selectable = true,
+  role = "listbox",
   selectAll = false,
   selectAllLabel = "Select all",
   emptyMessage = "No items",
@@ -273,9 +279,9 @@ export function ListItems({
     <div className={cn(listItemsVariants({ variant }), className)}>
       <ul
         id={id}
-        role="listbox"
+        role={role}
         tabIndex={0}
-        aria-multiselectable={selectable && multiple ? true : undefined}
+        aria-multiselectable={role !== "menu" && selectable && multiple ? true : undefined}
         aria-label={ariaLabel}
         aria-activedescendant={activeDescendant}
         onKeyDown={onKeyDown}
@@ -336,12 +342,13 @@ export function ListItems({
 
               const o = row.option;
               const isSelected = selectable && selectedValues.includes(o.value);
+              const destructive = Boolean(o.destructive);
               return (
                 <li
                   key={o.value}
                   id={`${id}-row-${i}`}
-                  role="option"
-                  aria-selected={selectable ? isSelected : undefined}
+                  role={role === "menu" ? "menuitem" : "option"}
+                  aria-selected={role === "menu" || !selectable ? undefined : isSelected}
                   aria-disabled={o.disabled || undefined}
                   ref={(n) => {
                     rowRefs.current[i] = n;
@@ -353,17 +360,21 @@ export function ListItems({
                     sz.option,
                     sz.optionText,
                     sz.icon,
+                    row.optionIndex > 0 && o.separated && "mt-1 border-t border-line",
                     o.disabled && "cursor-not-allowed opacity-50",
-                    active && !o.disabled && "bg-mint",
+                    destructive && "text-danger",
+                    active && !o.disabled && (destructive ? "bg-danger/10" : "bg-mint"),
                     isSelected && !active && "bg-mint/50",
                   )}
                 >
                   {selectable && multiple ? checkboxBox(Boolean(isSelected)) : null}
 
-                  {o.icon ? <span className="flex shrink-0 text-muted">{o.icon}</span> : null}
+                  {o.icon ? (
+                    <span className={cn("flex shrink-0", destructive ? "text-danger" : "text-muted")}>{o.icon}</span>
+                  ) : null}
 
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium text-ink">{o.label}</span>
+                    <span className={cn("block truncate font-medium", destructive ? "text-danger" : "text-ink")}>{o.label}</span>
                     {o.subtext != null ? (
                       <span className="mt-0.5 block truncate text-xs font-normal text-muted">
                         {o.subtext}

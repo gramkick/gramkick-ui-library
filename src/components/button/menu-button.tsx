@@ -15,6 +15,7 @@ import { createPortal } from "react-dom";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
 import { ChevronDownIcon as ChevronIcon } from "../icon";
+import { ListItems } from "../list-items/list-items";
 import { Button, type buttonVariants } from "./button";
 
 export interface MenuButtonItem {
@@ -52,12 +53,25 @@ export type MenuButtonProps = Omit<
     onOpenChange?: (open: boolean) => void;
   };
 
+interface MenuPos {
+  top: number;
+  left?: number;
+  right?: number;
+  minWidth: number;
+  maxHeight: number;
+  placement: "top" | "bottom";
+}
+
+const GAP = 6;
+const MARGIN = 8;
+
 /**
  * A {@link Button} that opens a list of actions. It reuses every `buttonVariants`
  * `variant` × `size`, adds a trailing chevron that flips while open, and renders
- * the list in a `document.body` portal so it escapes any `overflow` container.
- * Full keyboard support (↑/↓/Home/End/Enter/Esc); hover opening is opt-in via
- * `openOnHover`.
+ * the list (a {@link ListItems} with `role="menu"`) in a `document.body` portal
+ * so it escapes any `overflow` container. The menu opens downward and **flips
+ * upward** when it would overflow the viewport. Full keyboard support
+ * (↑/↓/Home/End/Enter/Esc); hover opening is opt-in via `openOnHover`.
  */
 export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(function MenuButton(
   {
@@ -80,17 +94,11 @@ export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(functio
   ref,
 ) {
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{
-    top: number;
-    left?: number;
-    right?: number;
-    minWidth: number;
-  } | null>(null);
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const [pos, setPos] = useState<MenuPos | null>(null);
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
-  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const measuredRef = useRef(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const menuId = useId();
 
@@ -109,31 +117,46 @@ export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(functio
         if (prev !== next) onOpenChange?.(next);
         return next;
       });
-      if (!next) setActiveIndex(-1);
     },
     [onOpenChange],
   );
 
-  const enabledIndexes = items.reduce<number[]>((acc, item, i) => {
-    if (!item.disabled) acc.push(i);
-    return acc;
-  }, []);
-
   const place = useCallback(() => {
     const r = triggerRef.current?.getBoundingClientRect();
     if (!r) return;
+    const menuH = menuRef.current?.offsetHeight ?? 0;
+    const spaceBelow = window.innerHeight - r.bottom - GAP - MARGIN;
+    const spaceAbove = r.top - GAP - MARGIN;
+    // Flip up only once we know the menu's height and it doesn't fit below while
+    // there's more room above.
+    const up = menuH > 0 && spaceBelow < menuH && spaceAbove > spaceBelow;
     setPos({
-      top: r.bottom + 6,
+      top: up ? Math.max(MARGIN, r.top - GAP - menuH) : r.bottom + GAP,
+      maxHeight: Math.max(140, (up ? spaceAbove : spaceBelow) + GAP),
+      placement: up ? "top" : "bottom",
       minWidth: r.width,
       ...(align === "end"
-        ? { right: Math.max(8, window.innerWidth - r.right) }
-        : { left: Math.max(8, r.left) }),
+        ? { right: Math.max(MARGIN, window.innerWidth - r.right) }
+        : { left: Math.max(MARGIN, r.left) }),
     });
   }, [align]);
 
+  // Pass 1: place below as soon as the menu opens.
   useLayoutEffect(() => {
-    if (open) place();
+    if (open) {
+      measuredRef.current = false;
+      place();
+    }
   }, [open, place]);
+
+  // Pass 2: once the portal has rendered and the menu has a real height, place
+  // again so it can flip upward if needed.
+  useLayoutEffect(() => {
+    if (open && pos && !measuredRef.current) {
+      measuredRef.current = true;
+      place();
+    }
+  }, [open, pos, place]);
 
   useEffect(() => {
     if (!open) return;
@@ -161,13 +184,14 @@ export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(functio
     };
   }, [open, place, setOpenState]);
 
+  // Move focus into the list once it has mounted.
   useEffect(() => {
-    // `pos` in the deps: on a keyboard open the menu isn't in the DOM until the
-    // layout effect has measured, so wait for that before moving focus.
-    if (open && pos && activeIndex >= 0) {
-      itemRefs.current[activeIndex]?.focus({ preventScroll: true });
-    }
-  }, [open, pos, activeIndex]);
+    if (!open) return;
+    const raf = requestAnimationFrame(() => {
+      menuRef.current?.querySelector<HTMLElement>('[role="menu"]')?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
 
   useEffect(() => {
     return () => {
@@ -192,20 +216,8 @@ export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(functio
     closeTimer.current = setTimeout(() => setOpenState(false), 140);
   };
 
-  const moveActive = (dir: 1 | -1) => {
-    if (enabledIndexes.length === 0) return;
-    const at = enabledIndexes.indexOf(activeIndex);
-    const nextAt =
-      at === -1
-        ? dir === 1
-          ? 0
-          : enabledIndexes.length - 1
-        : (at + dir + enabledIndexes.length) % enabledIndexes.length;
-    setActiveIndex(enabledIndexes[nextAt] ?? -1);
-  };
-
-  const choose = (item: MenuButtonItem) => {
-    if (item.disabled) return;
+  const choose = (item: MenuButtonItem | undefined) => {
+    if (!item || item.disabled) return;
     item.onSelect?.();
     setOpenState(false);
     triggerRef.current?.focus();
@@ -214,32 +226,9 @@ export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(functio
   const handleTriggerKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
     onKeyDown?.(e);
     if (disabled) return;
-    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       setOpenState(true);
-      setActiveIndex(enabledIndexes[0] ?? -1);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setOpenState(true);
-      setActiveIndex(enabledIndexes[enabledIndexes.length - 1] ?? -1);
-    }
-  };
-
-  const handleMenuKeyDown = (e: ReactKeyboardEvent<HTMLUListElement>) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      moveActive(1);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      moveActive(-1);
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      setActiveIndex(enabledIndexes[0] ?? -1);
-    } else if (e.key === "End") {
-      e.preventDefault();
-      setActiveIndex(enabledIndexes[enabledIndexes.length - 1] ?? -1);
-    } else if (e.key === "Tab") {
-      setOpenState(false);
     }
   };
 
@@ -274,61 +263,46 @@ export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(functio
 
       {open && pos && typeof document !== "undefined"
         ? createPortal(
-            <ul
+            <div
               ref={menuRef}
               id={menuId}
-              role="menu"
-              aria-label={typeof label === "string" ? label : undefined}
+              data-placement={pos.placement}
               onPointerEnter={hoverOpen}
               onPointerLeave={hoverClose}
-              onKeyDown={handleMenuKeyDown}
+              onKeyDown={(e) => {
+                if (e.key === "Tab") setOpenState(false);
+              }}
               style={{
                 position: "fixed",
                 top: pos.top,
                 left: pos.left,
                 right: pos.right,
                 minWidth: pos.minWidth,
+                maxHeight: pos.maxHeight,
               }}
               className={cn(
-                "z-[80] max-h-[min(60vh,20rem)] min-w-44 overflow-y-auto rounded-gk-md border border-line bg-canvas py-1 text-sm font-medium text-ink shadow-modal",
+                "z-[80] min-w-44 overflow-y-auto overflow-x-hidden rounded-gk-md border border-line bg-canvas shadow-modal",
                 menuClassName,
               )}
             >
-              {items.map((item, i) => (
-                <li
-                  key={i}
-                  role="none"
-                  className={cn(item.separated && i > 0 && "mt-1 border-t border-line pt-1")}
-                >
-                  <button
-                    ref={(el) => {
-                      itemRefs.current[i] = el;
-                    }}
-                    type="button"
-                    role="menuitem"
-                    tabIndex={-1}
-                    disabled={item.disabled}
-                    onClick={() => choose(item)}
-                    className={cn(
-                      "flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left transition-colors",
-                      "hover:bg-mint focus:bg-mint focus:outline-none",
-                      "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent",
-                      item.destructive && "text-danger hover:bg-danger/10 focus:bg-danger/10",
-                    )}
-                  >
-                    {item.icon != null ? (
-                      <span
-                        className="inline-flex size-4 shrink-0 items-center justify-center [&_svg]:size-4"
-                        aria-hidden="true"
-                      >
-                        {item.icon}
-                      </span>
-                    ) : null}
-                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>,
+              <ListItems
+                role="menu"
+                variant="plain"
+                size="sm"
+                selectable={false}
+                maxHeight={0}
+                aria-label={typeof label === "string" ? label : undefined}
+                options={items.map((item, i) => ({
+                  value: String(i),
+                  label: item.label,
+                  icon: item.icon,
+                  disabled: item.disabled,
+                  destructive: item.destructive,
+                  separated: item.separated,
+                }))}
+                onItemClick={(_option, i) => choose(items[i])}
+              />
+            </div>,
             document.body,
           )
         : null}

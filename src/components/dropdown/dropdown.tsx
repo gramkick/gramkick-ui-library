@@ -28,6 +28,16 @@ export interface DropdownOption {
   /** Leading element in the option row. */
   icon?: ReactNode;
   disabled?: boolean;
+  /**
+   * Red styling for a destructive row (e.g. "Delete"). Honoured by `ListItems`
+   * and `MenuButton`; ignored by `Dropdown` itself.
+   */
+  destructive?: boolean;
+  /**
+   * Draw a divider above this row. Honoured by `ListItems` and `MenuButton`;
+   * ignored by `Dropdown` itself.
+   */
+  separated?: boolean;
   /** Extra fields are allowed so `searchKeys` can point at them. */
   [key: string]: unknown;
 }

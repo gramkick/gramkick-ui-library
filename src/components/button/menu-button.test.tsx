@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { MenuButton, type MenuButtonItem } from "./menu-button";
@@ -46,7 +46,10 @@ describe("MenuButton", () => {
     const user = userEvent.setup();
     render(<MenuButton label="Actions" items={items()} />);
     await user.click(screen.getByRole("button", { name: "Actions" }));
-    expect(screen.getByRole("menuitem", { name: "Duplicate" })).toBeDisabled();
+    expect(screen.getByRole("menuitem", { name: "Duplicate" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
   });
 
   it("closes on Escape and on an outside click", async () => {
@@ -74,7 +77,7 @@ describe("MenuButton", () => {
     screen.getByRole("button", { name: "Actions" }).focus();
     await user.keyboard("{ArrowDown}");
     expect(screen.getByRole("menu")).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Edit" })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole("menu")).toHaveFocus());
   });
 
   it("keeps every buttonVariants variant/size on the trigger", () => {

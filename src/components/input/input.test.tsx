@@ -24,6 +24,16 @@ describe("Input", () => {
     expect(field.tagName).toBe("INPUT");
   });
 
+  it("multiline renders a textarea with the same label / hint chrome", async () => {
+    render(<Input label="Description" hint="Shown to customers" multiline rows={4} />);
+    const field = screen.getByLabelText("Description");
+    expect(field.tagName).toBe("TEXTAREA");
+    expect(field).toHaveAttribute("rows", "4");
+    expect(field.getAttribute("aria-describedby")).toBeTruthy();
+    await userEvent.type(field, "Line 1\nLine 2");
+    expect(field).toHaveValue("Line 1\nLine 2");
+  });
+
   it("marks required fields on the label", () => {
     render(<Input label="Name" required />);
     expect(screen.getByText("*")).toBeInTheDocument();

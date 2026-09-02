@@ -4,8 +4,10 @@ import {
   useMemo,
   useRef,
   type ChangeEvent,
+  type ForwardedRef,
   type InputHTMLAttributes,
   type ReactNode,
+  type TextareaHTMLAttributes,
 } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
@@ -56,7 +58,7 @@ const iconGutter: Record<InputSize, { padLeft: string; padRight: string; box: st
   lg: { padLeft: "pl-11", padRight: "pr-11", box: "w-11 [&_svg]:size-[1.15rem]" },
 };
 
-export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> &
+export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "onChange"> &
   VariantProps<typeof inputVariants> & {
     /** Field label. Rendered as a `<label>` wired to the input. Text or node. */
     label?: ReactNode;
@@ -84,6 +86,16 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> &
     invalid?: boolean;
     /** Classes for the outer wrapper (label + field + hint/error). */
     containerClassName?: string;
+    /**
+     * Render a `<textarea>` instead of an `<input>` — same field chrome, label,
+     * hint/error and `allowPattern`. The icon slots and `leftSelect` /
+     * `rightSelect` are ignored in this mode.
+     */
+    multiline?: boolean;
+    /** Visible rows for the `<textarea>` (only with `multiline`). */
+    rows?: number;
+    /** Fires on every edit. The event target is an `<input>` or, with `multiline`, a `<textarea>`. */
+    onChange?: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   };
 
 /**
@@ -93,9 +105,11 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> &
  * `readOnly` get distinct styling with hover suppressed. `leftSelect` /
  * `rightSelect` dock a from-scratch dropdown to either edge (country codes,
  * units, …), joined seamlessly with the field. `allowPattern` restricts what can
- * be typed / pasted to values matching a regex.
+ * be typed / pasted to values matching a regex. `multiline` swaps the `<input>`
+ * for a `<textarea>` (vertically resizable, `rows` sets the height) keeping the
+ * same label / hint / error chrome.
  */
-export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(function Input(
   {
     id: idProp,
     className,
@@ -115,6 +129,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     disabled,
     readOnly,
     type = "text",
+    multiline = false,
+    rows,
     value,
     defaultValue,
     onChange,
@@ -137,8 +153,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       .filter(Boolean)
       .join(" ") || undefined;
 
-  const hasLeftSelect = leftSelect != null;
-  const hasRightSelect = rightSelect != null;
+  const hasLeftSelect = leftSelect != null && !multiline;
+  const hasRightSelect = rightSelect != null && !multiline;
 
   // Drop stateful flags (`g` / `y`) so `.test()` is position-independent.
   const filterRe = useMemo(
@@ -152,7 +168,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     value != null ? String(value) : defaultValue != null ? String(defaultValue) : "",
   );
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const next = event.target.value;
     if (filterRe && next !== "" && !filterRe.test(next)) {
       // Reject the edit: restore the last value that passed (covers uncontrolled;
@@ -165,7 +181,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   };
 
   const leftIconEl =
-    leftIcon != null ? (
+    leftIcon != null && !multiline ? (
       <span
         aria-hidden="true"
         className={cn(
@@ -178,7 +194,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     ) : null;
 
   const rightIconEl =
-    rightIcon != null ? (
+    rightIcon != null && !multiline ? (
       <span
         className={cn(
           "absolute inset-y-0 right-0 flex items-center justify-center text-muted",
@@ -189,9 +205,38 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       </span>
     ) : null;
 
-  const inputEl = (
+  const fieldClassName = cn(
+    inputVariants({ variant, size }),
+    multiline
+      ? "h-auto min-h-16 resize-y py-2 leading-normal"
+      : cn(
+          leftIcon != null && iconGutter[resolvedSize].padLeft,
+          rightIcon != null && iconGutter[resolvedSize].padRight,
+        ),
+    hasLeftSelect && "rounded-l-none border-l-0",
+    hasRightSelect && "rounded-r-none border-r-0",
+    className,
+  );
+
+  const inputEl = multiline ? (
+    <textarea
+      ref={ref as ForwardedRef<HTMLTextAreaElement>}
+      id={id}
+      rows={rows}
+      required={required}
+      disabled={disabled}
+      readOnly={readOnly}
+      aria-invalid={isInvalid || undefined}
+      aria-describedby={describedBy}
+      value={value}
+      defaultValue={defaultValue}
+      onChange={handleChange}
+      className={fieldClassName}
+      {...(props as TextareaHTMLAttributes<HTMLTextAreaElement>)}
+    />
+  ) : (
     <input
-      ref={ref}
+      ref={ref as ForwardedRef<HTMLInputElement>}
       id={id}
       type={type}
       required={required}
@@ -202,14 +247,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       value={value}
       defaultValue={defaultValue}
       onChange={handleChange}
-      className={cn(
-        inputVariants({ variant, size }),
-        leftIcon != null && iconGutter[resolvedSize].padLeft,
-        rightIcon != null && iconGutter[resolvedSize].padRight,
-        hasLeftSelect && "rounded-l-none border-l-0",
-        hasRightSelect && "rounded-r-none border-r-0",
-        className,
-      )}
+      className={fieldClassName}
       {...props}
     />
   );

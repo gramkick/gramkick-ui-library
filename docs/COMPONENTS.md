@@ -445,8 +445,10 @@ state, and `asChild` for rendering a link/router element with button styling.
 
 ### MenuButton
 
-A `Button` that opens a list of actions in a `document.body` portal (escapes any
-`overflow` container). Full keyboard support (↑/↓/Home/End/Enter/Esc).
+A `Button` that opens a list of actions (a [`ListItems`](#listitems) with
+`role="menu"`) in a `document.body` portal — it escapes any `overflow`
+container, **flips upward** when it would overflow the bottom of the viewport,
+and caps its height with a scroll. Full keyboard support (↑/↓/Home/End/Enter/Esc).
 
 **Props**
 
@@ -797,6 +799,9 @@ edge selects, and keystroke filtering.
   each option is `{ value, label, triggerLabel?, subtext?, icon?, disabled? }`
 - `allowPattern` — a `RegExp` the whole value must match for an edit (type / paste
   / drop / autofill) to be accepted; empty is always allowed
+- `multiline` — render a `<textarea>` (vertically resizable) instead of an
+  `<input>`, same label / hint / error chrome; `rows` sets its height. The icon
+  slots and `left`/`rightSelect` are ignored in this mode.
 - `containerClassName` — classes for the label + field + hint/error wrapper
 - …all native `<input>` attributes (`value`, `onChange`, `placeholder`, `type`, …)
 
@@ -828,6 +833,13 @@ edge selects, and keystroke filtering.
   /* digits only, up to 2 decimals */
 }
 <Input label="Price (₹)" inputMode="decimal" allowPattern={/^\d*\.?\d{0,2}$/} />;
+```
+
+```tsx
+{
+  /* multi-line — renders a <textarea> */
+}
+<Input label="Description" multiline rows={4} value={desc} onChange={(e) => setDesc(e.target.value)} />;
 ```
 
 ```tsx
@@ -933,11 +945,14 @@ list without a trigger or popover (a sidebar filter, a picker panel).
 
 **Props**
 
-- `options` — same shape as `Dropdown` (flat or `isCategoriesList` groups)
+- `options` — same shape as `Dropdown` (flat or `isCategoriesList` groups); each
+  option also takes `destructive` (red row) and `separated` (divider above)
 - `multiple` — checkboxes instead of a single tick
 - `value` / `defaultValue` / `onChange` — `string` or `string[]`
 - `onItemClick(option, index)` — fires on every row click
 - `selectable` — set `false` for a plain action list (no tick/checkbox)
+- `role` — `"listbox"` (default) or `"menu"` (rows become `role="menuitem"`, no
+  selected state) — this is what `MenuButton` uses for its popup
 - `selectAll` + `selectAllLabel` — select-all row (multi)
 - `variant` — `outline` (default) · `filled` · `plain`; `size` — `sm` · `md` · `lg`
 - `maxHeight` — px cap before the list scrolls
@@ -997,6 +1012,7 @@ pattern as `Dropdown`, plus async loading and create-new.
 - `onInputChange(raw)` — every keystroke
 - `creatable` + `onCreate(text)` — add a new option from free text; `createLabel`
 - `emptyMessage` / `loadingMessage`
+- `leftIcon` — a node rendered inside the field, before the input (typically a search icon)
 - field props: `label` / `placeholder` / `hint` / `error` / `invalid` / `disabled` / `readOnly` / `variant` / `size`
 
 **Examples**

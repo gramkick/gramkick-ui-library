@@ -140,6 +140,8 @@ export interface AutosuggestProps extends VariantProps<typeof autosuggestFieldVa
 
   /* field, mirrors `Input` / `Dropdown` */
   label?: ReactNode;
+  /** A node rendered inside the field, before the input — typically an icon. */
+  leftIcon?: ReactNode;
   placeholder?: string;
   hint?: ReactNode;
   error?: ReactNode;
@@ -204,6 +206,7 @@ export function Autosuggest({
   variant,
   size,
   label,
+  leftIcon,
   placeholder,
   hint,
   error,
@@ -704,6 +707,14 @@ export function Autosuggest({
           onClick={() => inputRef.current?.focus()}
           className={cn(autosuggestFieldVariants({ variant, size }), className)}
         >
+          {leftIcon ? (
+            <span
+              className={cn("flex shrink-0 items-center self-center pe-1.5 text-muted", sz.icon)}
+              aria-hidden="true"
+            >
+              {leftIcon}
+            </span>
+          ) : null}
           {fieldChips}
           <input
             ref={inputRef}

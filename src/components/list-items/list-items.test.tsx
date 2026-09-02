@@ -133,6 +133,30 @@ describe("ListItems", () => {
     expect(screen.getByText("Nothing here")).toBeInTheDocument();
   });
 
+  it("renders an action menu with role=menu / menuitem and fires onItemClick", async () => {
+    const user = userEvent.setup();
+    const onItemClick = vi.fn();
+    render(
+      <ListItems
+        role="menu"
+        selectable={false}
+        aria-label="Row actions"
+        onItemClick={onItemClick}
+        options={[
+          { value: "edit", label: "Edit" },
+          { value: "delete", label: "Delete", destructive: true, separated: true },
+        ]}
+      />,
+    );
+    const menu = screen.getByRole("menu", { name: "Row actions" });
+    expect(menu).not.toHaveAttribute("aria-multiselectable");
+    const rows = within(menu).getAllByRole("menuitem");
+    expect(rows).toHaveLength(2);
+    expect(rows[1]).not.toHaveAttribute("aria-selected");
+    await user.click(rows[1]!);
+    expect(onItemClick).toHaveBeenCalledWith(expect.objectContaining({ value: "delete" }), 1);
+  });
+
   it("renders category headings and still selects across groups when isCategoriesList", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

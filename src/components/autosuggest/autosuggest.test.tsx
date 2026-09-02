@@ -21,6 +21,21 @@ describe("Autosuggest", () => {
     expect(screen.queryByText("City or state")).not.toBeInTheDocument(); // hidden while error is set
   });
 
+  it("renders a leftIcon inside the field, before the input", () => {
+    render(
+      <Autosuggest
+        options={CITIES}
+        label="City"
+        leftIcon={<svg data-testid="search-icon" />}
+      />,
+    );
+    const icon = screen.getByTestId("search-icon");
+    const input = screen.getByRole("combobox", { name: "City" });
+    expect(icon).toBeInTheDocument();
+    // icon comes before the input in DOM order
+    expect(icon.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("filters local options as you type (debounce 0)", async () => {
     const user = userEvent.setup();
     render(
