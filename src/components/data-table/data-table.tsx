@@ -903,150 +903,150 @@ export function DataTable<T>({
           data-slot="data-table-scroll"
           data-scrolled-x={edge.left || undefined}
           className={cn("min-w-0 overflow-x-auto", maxHeight && "overflow-y-auto")}
-        style={scrollStyle}
-      >
-        <table aria-label={ariaLabel} className={cn(dataTableVariants({ variant, size }))}>
-          {columns.some((c) => c.width != null) ? (
-            <colgroup>
-              {selectable ? <col className="w-0" /> : null}
-              {columns.map((col) => (
-                <col
-                  key={col.id}
-                  style={
-                    col.width != null
-                      ? { width: typeof col.width === "number" ? `${col.width}px` : col.width }
-                      : undefined
-                  }
-                />
-              ))}
-              {actions ? <col className="w-0" /> : null}
-            </colgroup>
-          ) : null}
-
-          <thead className="border-b-2 border-line bg-mint">
-            <tr>
-              {selectable ? (
-                <th
-                  scope="col"
-                  className={cn(
-                    thBase,
-                    "w-0",
-                    leftPinned(pinCheckbox, "bg-mint"),
-                    pinHeader && pinCheckbox && "z-30",
-                  )}
-                >
-                  {headerLoading ? (
-                    <span className="flex items-center">
-                      <Skeleton variant="rounded" width={16} height={16} />
-                    </span>
-                  ) : (
-                    headerSelect
-                  )}
-                </th>
-              ) : null}
-              {columns.map((col, ci) => {
-                const pinned = pinFirstData && ci === 0;
-                const activeDir = sort?.id === col.id ? sort.dir : null;
-                return (
-                  <th
+          style={scrollStyle}
+        >
+          <table aria-label={ariaLabel} className={cn(dataTableVariants({ variant, size }))}>
+            {columns.some((c) => c.width != null) ? (
+              <colgroup>
+                {selectable ? <col className="w-0" /> : null}
+                {columns.map((col) => (
+                  <col
                     key={col.id}
-                    scope="col"
-                    aria-sort={
-                      col.sortable && !headerLoading
-                        ? activeDir === "asc"
-                          ? "ascending"
-                          : activeDir === "desc"
-                            ? "descending"
-                            : "none"
+                    style={
+                      col.width != null
+                        ? { width: typeof col.width === "number" ? `${col.width}px` : col.width }
                         : undefined
                     }
+                  />
+                ))}
+                {actions ? <col className="w-0" /> : null}
+              </colgroup>
+            ) : null}
+
+            <thead className="border-b-2 border-line bg-mint">
+              <tr>
+                {selectable ? (
+                  <th
+                    scope="col"
                     className={cn(
                       thBase,
-                      alignClass(col.align),
-                      leftPinned(pinned, "bg-mint"),
-                      pinned && pinHeader && "z-30",
-                      col.headerClassName,
+                      "w-0",
+                      leftPinned(pinCheckbox, "bg-mint"),
+                      pinHeader && pinCheckbox && "z-30",
                     )}
                   >
                     {headerLoading ? (
-                      <span
-                        className={cn(
-                          "flex items-center",
-                          col.align === "right" && "justify-end",
-                          col.align === "center" && "justify-center",
-                        )}
-                      >
-                        <Skeleton width={56 + ((ci * 17) % 44)} height={12} />
+                      <span className="flex items-center">
+                        <Skeleton variant="rounded" width={16} height={16} />
                       </span>
-                    ) : col.sortable ? (
-                      <button
-                        type="button"
-                        onClick={() => cycleSort(col.id)}
-                        className={cn(
-                          "-mx-1 inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded px-1 py-0.5 align-middle font-semibold transition-colors hover:text-ink",
-                          activeDir && "text-ink",
-                        )}
-                      >
-                        <span>{col.header}</span>
-                        <SortIcon dir={activeDir} />
-                      </button>
                     ) : (
-                      col.header
+                      headerSelect
                     )}
                   </th>
-                );
-              })}
-              {actions ? (
-                <th
-                  scope="col"
-                  className={cn(
-                    thBase,
-                    "w-0 text-right",
-                    rightPinned("bg-mint"),
-                    stickyActions && pinHeader && "z-30",
-                  )}
-                >
-                  {headerLoading ? (
-                    <span className="flex items-center justify-end">
-                      <Skeleton width={48} height={12} />
-                    </span>
-                  ) : (
-                    (actionsHeader ?? <span className="sr-only">Actions</span>)
-                  )}
-                </th>
-              ) : null}
-            </tr>
-          </thead>
+                ) : null}
+                {columns.map((col, ci) => {
+                  const pinned = pinFirstData && ci === 0;
+                  const activeDir = sort?.id === col.id ? sort.dir : null;
+                  return (
+                    <th
+                      key={col.id}
+                      scope="col"
+                      aria-sort={
+                        col.sortable && !headerLoading
+                          ? activeDir === "asc"
+                            ? "ascending"
+                            : activeDir === "desc"
+                              ? "descending"
+                              : "none"
+                          : undefined
+                      }
+                      className={cn(
+                        thBase,
+                        alignClass(col.align),
+                        leftPinned(pinned, "bg-mint"),
+                        pinned && pinHeader && "z-30",
+                        col.headerClassName,
+                      )}
+                    >
+                      {headerLoading ? (
+                        <span
+                          className={cn(
+                            "flex items-center",
+                            col.align === "right" && "justify-end",
+                            col.align === "center" && "justify-center",
+                          )}
+                        >
+                          <Skeleton width={56 + ((ci * 17) % 44)} height={12} />
+                        </span>
+                      ) : col.sortable ? (
+                        <button
+                          type="button"
+                          onClick={() => cycleSort(col.id)}
+                          className={cn(
+                            "-mx-1 inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded px-1 py-0.5 align-middle font-semibold transition-colors hover:text-ink",
+                            activeDir && "text-ink",
+                          )}
+                        >
+                          <span>{col.header}</span>
+                          <SortIcon dir={activeDir} />
+                        </button>
+                      ) : (
+                        col.header
+                      )}
+                    </th>
+                  );
+                })}
+                {actions ? (
+                  <th
+                    scope="col"
+                    className={cn(
+                      thBase,
+                      "w-0 text-right",
+                      rightPinned("bg-mint"),
+                      stickyActions && pinHeader && "z-30",
+                    )}
+                  >
+                    {headerLoading ? (
+                      <span className="flex items-center justify-end">
+                        <Skeleton width={48} height={12} />
+                      </span>
+                    ) : (
+                      (actionsHeader ?? <span className="sr-only">Actions</span>)
+                    )}
+                  </th>
+                ) : null}
+              </tr>
+            </thead>
 
-          <tbody>
-            {loading
-              ? loadingState != null
-                ? stateRow(loadingState)
-                : skeletonRows
-              : error
-                ? stateRow(
-                    errorState ?? (
-                      <EmptyState
-                        variant="error"
-                        size={size === "lg" ? "md" : "sm"}
-                        title="Couldn't load data"
-                        description={error}
-                      />
-                    ),
-                  )
-                : pageRows.length === 0
+            <tbody>
+              {loading
+                ? loadingState != null
+                  ? stateRow(loadingState)
+                  : skeletonRows
+                : error
                   ? stateRow(
-                      emptyState ?? (
+                      errorState ?? (
                         <EmptyState
+                          variant="error"
                           size={size === "lg" ? "md" : "sm"}
-                          title={emptyTitle}
-                          description={emptyDescription}
+                          title="Couldn't load data"
+                          description={error}
                         />
                       ),
                     )
-                  : bodyRows}
-          </tbody>
-        </table>
+                  : pageRows.length === 0
+                    ? stateRow(
+                        emptyState ?? (
+                          <EmptyState
+                            size={size === "lg" ? "md" : "sm"}
+                            title={emptyTitle}
+                            description={emptyDescription}
+                          />
+                        ),
+                      )
+                    : bodyRows}
+            </tbody>
+          </table>
         </div>
       </div>
 
