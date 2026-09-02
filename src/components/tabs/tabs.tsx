@@ -8,8 +8,10 @@ import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
 import { useControllableState } from "../../hooks/use-controllable-state";
@@ -245,10 +247,17 @@ export function TabsList({ className, children, onKeyDown, ...rest }: TabsListPr
 export interface TabsTriggerProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "value"> {
   /** Identity of the tab — must match a `TabsContent` `value`. */
   value: string;
-  /** Leading element (auto-sized for SVGs). */
+  /** Leading element (auto-sized for SVGs). Ignored when `asChild` is set. */
   icon?: ReactNode;
-  /** Trailing count / status pill. */
+  /** Trailing count / status pill. Ignored when `asChild` is set. */
   badge?: ReactNode;
+  /**
+   * Render the single child element instead of a `<button>` — e.g. a router
+   * `<Link>` for tabbed navigation, so each tab is still a real anchor. The tab
+   * props (`role`, `data-state`, click-to-select, classes) are merged onto the
+   * child; `icon` / `badge` are not injected in this mode.
+   */
+  asChild?: boolean;
 }
 
 export function TabsTrigger({
@@ -256,6 +265,7 @@ export function TabsTrigger({
   icon,
   badge,
   disabled = false,
+  asChild = false,
   className,
   children,
   onClick,
@@ -264,24 +274,31 @@ export function TabsTrigger({
   const { value: selected, select, variant, size, baseId } = useTabsContext("TabsTrigger");
   const isSelected = selected === value;
 
+  const shared = {
+    role: "tab",
+    id: triggerId(baseId, value),
+    "aria-selected": isSelected,
+    "aria-controls": panelId(baseId, value),
+    tabIndex: isSelected || selected == null ? 0 : -1,
+    "data-value": value,
+    "data-state": isSelected ? "active" : "inactive",
+    onClick: (event: ReactMouseEvent<HTMLElement>) => {
+      onClick?.(event as ReactMouseEvent<HTMLButtonElement>);
+      if (!event.defaultPrevented) select(value);
+    },
+    className: cn(tabsTriggerVariants({ variant, size }), className),
+  } as const;
+
+  if (asChild) {
+    return (
+      <Slot aria-disabled={disabled || undefined} {...shared} {...rest}>
+        {children}
+      </Slot>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      role="tab"
-      id={triggerId(baseId, value)}
-      aria-selected={isSelected}
-      aria-controls={panelId(baseId, value)}
-      tabIndex={isSelected || selected == null ? 0 : -1}
-      disabled={disabled}
-      data-value={value}
-      data-state={isSelected ? "active" : "inactive"}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) select(value);
-      }}
-      className={cn(tabsTriggerVariants({ variant, size }), className)}
-      {...rest}
-    >
+    <button type="button" disabled={disabled} {...shared} {...rest}>
       {icon != null ? (
         <span className="inline-flex shrink-0 items-center" aria-hidden="true">
           {icon}

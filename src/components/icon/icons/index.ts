@@ -24,6 +24,8 @@ export { CopyIcon } from "./copy-icon";
 export { UploadIcon } from "./upload-icon";
 export { DownloadIcon } from "./download-icon";
 export { ShareIcon } from "./share-icon";
+export { GlobeIcon } from "./globe-icon";
+export { GramKickIcon } from "./gramkick-icon";
 export { RefreshIcon } from "./refresh-icon";
 export { RotateCcwIcon } from "./rotate-ccw-icon";
 export { InfoIcon } from "./info-icon";
@@ -71,6 +73,9 @@ export { StarIcon } from "./star-icon";
 export { ThumbsUpIcon } from "./thumbs-up-icon";
 export { HeadphonesIcon } from "./headphones-icon";
 export { ArrowUpDownIcon } from "./arrow-up-down-icon";
+export { TrendUpIcon } from "./trend-up-icon";
+export { BarChartIcon } from "./bar-chart-icon";
+export { LeafIcon } from "./leaf-icon";
 export { AwardIcon } from "./award-icon";
 export { BadgeCheckIcon } from "./badge-check-icon";
 export { BookmarkIcon } from "./bookmark-icon";
@@ -120,6 +125,8 @@ import { CopyIcon } from "./copy-icon";
 import { UploadIcon } from "./upload-icon";
 import { DownloadIcon } from "./download-icon";
 import { ShareIcon } from "./share-icon";
+import { GlobeIcon } from "./globe-icon";
+import { GramKickIcon } from "./gramkick-icon";
 import { RefreshIcon } from "./refresh-icon";
 import { RotateCcwIcon } from "./rotate-ccw-icon";
 import { InfoIcon } from "./info-icon";
@@ -167,6 +174,9 @@ import { StarIcon } from "./star-icon";
 import { ThumbsUpIcon } from "./thumbs-up-icon";
 import { HeadphonesIcon } from "./headphones-icon";
 import { ArrowUpDownIcon } from "./arrow-up-down-icon";
+import { TrendUpIcon } from "./trend-up-icon";
+import { BarChartIcon } from "./bar-chart-icon";
+import { LeafIcon } from "./leaf-icon";
 import { AwardIcon } from "./award-icon";
 import { BadgeCheckIcon } from "./badge-check-icon";
 import { BookmarkIcon } from "./bookmark-icon";
@@ -218,6 +228,8 @@ export const icons = {
   UploadIcon,
   DownloadIcon,
   ShareIcon,
+  GlobeIcon,
+  GramKickIcon,
   RefreshIcon,
   RotateCcwIcon,
   InfoIcon,
@@ -265,6 +277,9 @@ export const icons = {
   ThumbsUpIcon,
   HeadphonesIcon,
   ArrowUpDownIcon,
+  TrendUpIcon,
+  BarChartIcon,
+  LeafIcon,
   AwardIcon,
   BadgeCheckIcon,
   BookmarkIcon,

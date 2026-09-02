@@ -34,6 +34,23 @@ describe("Dropdown", () => {
     expect(screen.getByText("Required")).toBeInTheDocument();
   });
 
+  it("renders a leftIcon inside the trigger, before the value", () => {
+    render(
+      <Dropdown
+        options={OPTIONS}
+        label="City"
+        defaultValue="mum"
+        leftIcon={<svg data-testid="left-icon" />}
+      />,
+    );
+    const combobox = screen.getByRole("combobox");
+    const icon = within(combobox).getByTestId("left-icon");
+    expect(icon).toBeInTheDocument();
+    expect(icon.compareDocumentPosition(screen.getByText("Mumbai"))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
   it("opens on click and lists options with subtext and tertiary text", async () => {
     const user = userEvent.setup();
     render(<Dropdown options={OPTIONS} label="City" />);

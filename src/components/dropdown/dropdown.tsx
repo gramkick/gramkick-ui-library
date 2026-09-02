@@ -134,6 +134,8 @@ export interface DropdownProps extends VariantProps<typeof dropdownTriggerVarian
 
   /* field, mirrors `Input` */
   label?: ReactNode;
+  /** Element rendered inside the trigger, before the value — typically an icon. */
+  leftIcon?: ReactNode;
   placeholder?: string;
   hint?: ReactNode;
   error?: ReactNode;
@@ -191,6 +193,7 @@ export function Dropdown({
   variant,
   size,
   label,
+  leftIcon,
   placeholder = "Select…",
   hint,
   error,
@@ -563,6 +566,11 @@ export function Dropdown({
           onKeyDown={onNavKeyDown}
           className={cn(dropdownTriggerVariants({ variant, size }), className)}
         >
+          {leftIcon ? (
+            <span className={cn("flex shrink-0 items-center self-center pe-1.5 text-muted", sz.icon)}>
+              {leftIcon}
+            </span>
+          ) : null}
           <div
             className={cn(
               "flex min-w-0 flex-1 flex-nowrap items-center overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",

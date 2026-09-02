@@ -143,6 +143,35 @@ describe("Tabs", () => {
     expect(first).toHaveAttribute("tabindex", "-1");
   });
 
+  it("asChild renders the child element (a link) as the tab, merging tab props", async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+    render(
+      <Tabs value="home" onValueChange={onValueChange} variant="line" activationMode="manual">
+        <TabsList>
+          <TabsTrigger value="home" asChild>
+            <a href="/">Home</a>
+          </TabsTrigger>
+          <TabsTrigger value="about" asChild>
+            <a href="/about">About</a>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>,
+    );
+    const home = screen.getByRole("tab", { name: "Home" });
+    expect(home.tagName).toBe("A");
+    expect(home).toHaveAttribute("href", "/");
+    expect(home).toHaveAttribute("aria-selected", "true");
+    expect(home).toHaveAttribute("data-state", "active");
+
+    const about = screen.getByRole("tab", { name: "About" });
+    expect(about).toHaveAttribute("data-state", "inactive");
+    expect(about).toHaveAttribute("tabindex", "-1");
+
+    await user.click(about);
+    expect(onValueChange).toHaveBeenCalledWith("about");
+  });
+
   it("keeps forceMount panels mounted but hidden", () => {
     render(
       <Tabs defaultValue="a">

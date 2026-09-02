@@ -142,13 +142,13 @@ import { cn, type DateRange } from "@gramkick/ui";
 | [`Tooltip`](#tooltip)                                                             | Hover / focus / click tooltip, auto-flipping, rich content.                        |
 | [`Toast`](#toast) (`ToastMessenger` / `useToast` / `ToastProvider`)               | Imperative toasts, callable anywhere.                                              |
 | [`DataTable`](#datatable)                                                         | Sortable, selectable, paginated, responsive table.                                 |
-| [Icons](#icons)                                                                   | 95 tree-shakeable SVG icons + `createIcon`.                                        |
+| [Icons](#icons)                                                                   | 100 tree-shakeable SVG icons + `createIcon` (incl. the `GramKickIcon` brand mark).                                        |
 
 ---
 
 ## Icons
 
-95 SVG icons, each built with `createIcon` so they share one prop contract.
+100 SVG icons, each built with `createIcon` so they share one prop contract.
 Colour flows from `currentColor`, so `text-*` utilities tint them.
 
 ```tsx
@@ -323,7 +323,7 @@ The utilities work on their own too — `<span className="text-h4">` — and
 Every token is a Tailwind v4 `@theme` variable in `@gramkick/ui/theme.css` (also
 baked into the prebuilt `styles.css`). Use the utility, the CSS variable, or both.
 
-### Colour
+### Color
 
 | Utility root                                    | Variable                               | Use                          |
 | ----------------------------------------------- | -------------------------------------- | ---------------------------- |
@@ -862,6 +862,7 @@ From-scratch single / multi select (no native `<select>`). Same field API as
 - `multiple` — checkbox per option; `value` becomes `string[]`
 - `value` / `defaultValue` / `onChange` — `string` (single) or `string[]` (multi)
 - `label` / `placeholder` / `hint` / `error` / `invalid` / `disabled` / `readOnly` / `required`
+- `leftIcon` — a node rendered inside the trigger, before the value (an icon)
 - `variant` — `outline` (default) · `filled`; `size` — `sm` · `md` · `lg`
 - `searchable` — adds a filter box in the menu; `searchKeys` picks which fields to
   match; `searchPlaceholder`; `onSearchChange(query)`
@@ -1397,7 +1398,9 @@ roving-tabindex keyboard support (Arrows, Home, End).
 - `items` — `TabsItem[]`: `{ value, label, content?, icon?, badge?, disabled? }`
 - `activationMode` — `automatic` (default, select on focus) · `manual` (select on Enter/Space/click)
 
-**`TabsTrigger`** — `value` (must match a `TabsContent`), `icon`, `badge`, `disabled`.
+**`TabsTrigger`** — `value` (must match a `TabsContent`), `icon`, `badge`,
+`disabled`, `asChild` (render the child element — e.g. a router `<Link>` — instead
+of a `<button>`, for tabbed navigation; `icon` / `badge` are then ignored).
 **`TabsContent`** — `value`, `forceMount` (keep mounted while hidden).
 
 **Examples**
@@ -1434,6 +1437,22 @@ roving-tabindex keyboard support (Arrows, Home, End).
   <TabsContent value="payouts">
     <Payouts />
   </TabsContent>
+</Tabs>;
+```
+
+```tsx
+{
+  /* tabbed navigation — each tab is a real <a>, no TabsContent */
+}
+<Tabs variant="line" value={section} onValueChange={setSection} activationMode="manual">
+  <TabsList aria-label="Primary">
+    <TabsTrigger value="home" asChild>
+      <Link href="/">Home</Link>
+    </TabsTrigger>
+    <TabsTrigger value="pricing" asChild>
+      <Link href="/pricing">Pricing</Link>
+    </TabsTrigger>
+  </TabsList>
 </Tabs>;
 ```
 
