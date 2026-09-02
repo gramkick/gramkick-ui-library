@@ -93,6 +93,7 @@ export { PackageOpenIcon } from "./package-open-icon";
 export { PlusCircleIcon } from "./plus-circle-icon";
 export { PrinterIcon } from "./printer-icon";
 export { RepeatIcon } from "./repeat-icon";
+export { ReplaceIcon } from "./replace-icon";
 export { ShieldCheckIcon } from "./shield-check-icon";
 export { SmartphoneIcon } from "./smartphone-icon";
 export { SparklesIcon } from "./sparkles-icon";
@@ -194,6 +195,7 @@ import { PackageOpenIcon } from "./package-open-icon";
 import { PlusCircleIcon } from "./plus-circle-icon";
 import { PrinterIcon } from "./printer-icon";
 import { RepeatIcon } from "./repeat-icon";
+import { ReplaceIcon } from "./replace-icon";
 import { ShieldCheckIcon } from "./shield-check-icon";
 import { SmartphoneIcon } from "./smartphone-icon";
 import { SparklesIcon } from "./sparkles-icon";
@@ -297,6 +299,7 @@ export const icons = {
   PlusCircleIcon,
   PrinterIcon,
   RepeatIcon,
+  ReplaceIcon,
   ShieldCheckIcon,
   SmartphoneIcon,
   SparklesIcon,
