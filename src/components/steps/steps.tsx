@@ -236,6 +236,10 @@ export const Steps = forwardRef<HTMLElement, StepsProps>(function Steps(
     >
       {list.map((step, i) => {
         const status = statusOf(i, step);
+        // Horizontal: give the first / last step half-width columns aligned to the
+        // outer edges so the connector track spans the full width (no dead space
+        // on the ends). Middle steps stay equal-width and centred.
+        const edge = list.length > 1 ? (i === 0 ? "start" : i === last ? "end" : "mid") : "mid";
         const interactive =
           clickable && !step.disabled && (status === "complete" || status === "current");
         const activate = () => {
@@ -256,7 +260,17 @@ export const Steps = forwardRef<HTMLElement, StepsProps>(function Steps(
         );
 
         const text = (
-          <div className={cn(vertical ? "text-left" : "mt-2 text-center")}>
+          <div
+            className={cn(
+              vertical
+                ? "text-left"
+                : edge === "start"
+                  ? "mt-2 text-left"
+                  : edge === "end"
+                    ? "mt-2 text-right"
+                    : "mt-2 text-center",
+            )}
+          >
             <div
               className={cn(
                 "font-medium text-ink",
@@ -312,13 +326,21 @@ export const Steps = forwardRef<HTMLElement, StepsProps>(function Steps(
             data-slot="step"
             data-status={status}
             aria-current={status === "current" ? "step" : undefined}
-            className="relative flex flex-1 flex-col items-center"
+            className={cn(
+              "relative flex min-w-0 flex-col",
+              edge === "start"
+                ? "grow-[0.5] basis-0 items-start"
+                : edge === "end"
+                  ? "grow-[0.5] basis-0 items-end"
+                  : "flex-1 items-center",
+            )}
           >
             {i > 0 ? (
               <span
                 aria-hidden="true"
                 className={cn(
-                  "absolute right-1/2 h-0.5 w-full",
+                  "absolute h-0.5",
+                  edge === "end" ? "right-0 w-[200%]" : "right-1/2 w-full",
                   CONNECTOR_TOP[size],
                   doneLine(statusOf(i - 1, list[i - 1]!) === "complete"),
                 )}
@@ -329,13 +351,21 @@ export const Steps = forwardRef<HTMLElement, StepsProps>(function Steps(
                 type="button"
                 aria-label={labelText ?? `Step ${i + 1}`}
                 onClick={activate}
-                className="flex cursor-pointer flex-col items-center gap-2 rounded-gk-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf/40"
+                className={cn(
+                  "flex cursor-pointer flex-col gap-2 rounded-gk-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf/40",
+                  edge === "start" ? "items-start" : edge === "end" ? "items-end" : "items-center",
+                )}
               >
                 {circle}
                 {text}
               </button>
             ) : (
-              <div className="flex flex-col items-center gap-2">
+              <div
+                className={cn(
+                  "flex flex-col gap-2",
+                  edge === "start" ? "items-start" : edge === "end" ? "items-end" : "items-center",
+                )}
+              >
                 {circle}
                 {text}
               </div>
