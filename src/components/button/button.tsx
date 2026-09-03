@@ -15,6 +15,8 @@ export const buttonVariants = cva(
         primary: "bg-leaf text-white hover:bg-leaf-dark",
         secondary: "bg-mint text-leaf-dark hover:bg-art",
         outline: "border border-line bg-canvas text-ink hover:bg-mint",
+        "outline-brand": "border border-leaf bg-canvas text-leaf hover:bg-mint",
+        "outline-danger": "border border-danger bg-canvas text-danger hover:bg-danger/10",
         ghost: "text-ink hover:bg-mint",
         danger: "bg-danger text-white hover:brightness-95",
         link: "text-leaf underline-offset-4 hover:underline",

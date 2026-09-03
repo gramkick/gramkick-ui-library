@@ -37,7 +37,7 @@ const meta = {
   argTypes: {
     variant: {
       control: "inline-radio",
-      options: ["primary", "secondary", "outline", "ghost", "danger", "link"],
+      options: ["primary", "secondary", "outline", "outline-brand", "outline-danger", "ghost", "danger", "link"],
     },
     size: { control: "inline-radio", options: ["sm", "md", "lg", "icon"] },
     loading: { control: "boolean" },
@@ -69,6 +69,12 @@ export const Variants: Story = {
       </Button>
       <Button {...args} variant="outline">
         Outline
+      </Button>
+      <Button {...args} variant="outline-brand">
+        Outline brand
+      </Button>
+      <Button {...args} variant="outline-danger">
+        Outline danger
       </Button>
       <Button {...args} variant="ghost">
         Ghost

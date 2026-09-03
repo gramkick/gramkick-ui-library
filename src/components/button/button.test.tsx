@@ -46,6 +46,19 @@ describe("Button", () => {
     expect(button).not.toHaveClass("bg-leaf");
   });
 
+  it("applies the leaf border + text for the outline-brand variant", () => {
+    render(<Button variant="outline-brand">Add</Button>);
+    const button = screen.getByRole("button", { name: "Add" });
+    expect(button).toHaveClass("border-leaf", "text-leaf");
+  });
+
+  it("applies a danger border + text (no fill) for the outline-danger variant", () => {
+    render(<Button variant="outline-danger">Log out</Button>);
+    const button = screen.getByRole("button", { name: "Log out" });
+    expect(button).toHaveClass("border", "border-danger", "text-danger", "bg-canvas");
+    expect(button).not.toHaveClass("text-white");
+  });
+
   it("accepts the label prop as an alternative to children", () => {
     render(<Button label="Save" />);
     expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
