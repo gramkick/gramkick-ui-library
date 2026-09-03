@@ -99,6 +99,10 @@ export { SmartphoneIcon } from "./smartphone-icon";
 export { SparklesIcon } from "./sparkles-icon";
 export { TicketPercentIcon } from "./ticket-percent-icon";
 export { ZapIcon } from "./zap-icon";
+export { FileTextIcon } from "./file-text-icon";
+export { UploadCloudIcon } from "./upload-cloud-icon";
+export { CameraIcon } from "./camera-icon";
+export { BriefcaseIcon } from "./briefcase-icon";
 
 import { ChevronUpIcon } from "./chevron-up-icon";
 import { ChevronDownIcon } from "./chevron-down-icon";
@@ -201,6 +205,10 @@ import { SmartphoneIcon } from "./smartphone-icon";
 import { SparklesIcon } from "./sparkles-icon";
 import { TicketPercentIcon } from "./ticket-percent-icon";
 import { ZapIcon } from "./zap-icon";
+import { FileTextIcon } from "./file-text-icon";
+import { UploadCloudIcon } from "./upload-cloud-icon";
+import { CameraIcon } from "./camera-icon";
+import { BriefcaseIcon } from "./briefcase-icon";
 
 /** Every icon component, keyed by name — handy for galleries and docs. */
 export const icons = {
@@ -305,6 +313,10 @@ export const icons = {
   SparklesIcon,
   TicketPercentIcon,
   ZapIcon,
+  FileTextIcon,
+  UploadCloudIcon,
+  CameraIcon,
+  BriefcaseIcon,
 } as const;
 
 /** Union of every exported icon name. */

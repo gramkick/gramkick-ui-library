@@ -142,13 +142,13 @@ import { cn, type DateRange } from "@gramkick/ui";
 | [`Tooltip`](#tooltip)                                                             | Hover / focus / click tooltip, auto-flipping, rich content.                        |
 | [`Toast`](#toast) (`ToastMessenger` / `useToast` / `ToastProvider`)               | Imperative toasts, callable anywhere.                                              |
 | [`DataTable`](#datatable)                                                         | Sortable, selectable, paginated, responsive table.                                 |
-| [Icons](#icons)                                                                   | 101 tree-shakeable SVG icons + `createIcon` (incl. the `GramKickIcon` brand mark).                                        |
+| [Icons](#icons)                                                                   | 105 tree-shakeable SVG icons + `createIcon` (incl. the `GramKickIcon` brand mark).                                        |
 
 ---
 
 ## Icons
 
-101 SVG icons, each built with `createIcon` so they share one prop contract.
+105 SVG icons, each built with `createIcon` so they share one prop contract.
 Colour flows from `currentColor`, so `text-*` utilities tint them.
 
 ```tsx
