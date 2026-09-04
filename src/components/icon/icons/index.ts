@@ -15,6 +15,7 @@ export { CheckIcon } from "./check-icon";
 export { XIcon } from "./x-icon";
 export { PlusIcon } from "./plus-icon";
 export { MinusIcon } from "./minus-icon";
+export { PauseIcon } from "./pause-icon";
 export { SearchIcon } from "./search-icon";
 export { FilterIcon } from "./filter-icon";
 export { SlidersIcon } from "./sliders-icon";
@@ -121,6 +122,7 @@ import { CheckIcon } from "./check-icon";
 import { XIcon } from "./x-icon";
 import { PlusIcon } from "./plus-icon";
 import { MinusIcon } from "./minus-icon";
+import { PauseIcon } from "./pause-icon";
 import { SearchIcon } from "./search-icon";
 import { FilterIcon } from "./filter-icon";
 import { SlidersIcon } from "./sliders-icon";
@@ -229,6 +231,7 @@ export const icons = {
   XIcon,
   PlusIcon,
   MinusIcon,
+  PauseIcon,
   SearchIcon,
   FilterIcon,
   SlidersIcon,
