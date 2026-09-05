@@ -17,5 +17,5 @@ for (const file of targets) {
   const source = readFileSync(path, "utf8");
   if (source.startsWith('"use client"') || source.startsWith("'use client'")) continue;
   writeFileSync(path, directive + source);
-  console.log(`added "use client" -> dist/${file}`);
+  console.log(`added "use client" --> dist/${file}`);
 }
