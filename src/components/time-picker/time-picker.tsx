@@ -70,13 +70,25 @@ function TimeColumn({
     const i = values.indexOf(selected);
     return i >= 0 ? i : 0;
   });
+  // Only recentre the list when the active row changed because of keyboard
+  // navigation or a new `selected` value (or the initial open) — never because
+  // the pointer crossed a row while the user was wheel-scrolling. Writing
+  // scrollTop on hover fights the native scroll: the list jerks back and mid-list
+  // rows become impossible to reach or click. Starts true so the current time is
+  // centred when the popover opens.
+  const recentreRef = useRef(true);
 
   useEffect(() => {
     const i = values.indexOf(selected);
-    if (i >= 0) setActiveIndex(i);
+    if (i >= 0) {
+      recentreRef.current = true;
+      setActiveIndex(i);
+    }
   }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!recentreRef.current) return;
+    recentreRef.current = false;
     const list = listRef.current;
     const item = activeRef.current;
     if (list && item)
@@ -94,6 +106,7 @@ function TimeColumn({
             ? 0
             : enabled.length - 1
           : (pos + dir + enabled.length) % enabled.length;
+      recentreRef.current = true;
       setActiveIndex(enabled[next]!);
     },
     [values, isDisabled, activeIndex],
@@ -111,12 +124,14 @@ function TimeColumn({
         break;
       case "Home":
         e.preventDefault();
+        recentreRef.current = true;
         setActiveIndex(values.findIndex((v) => !isDisabled?.(v)));
         break;
       case "End":
         e.preventDefault();
         for (let i = values.length - 1; i >= 0; i--)
           if (!isDisabled?.(values[i]!)) {
+            recentreRef.current = true;
             setActiveIndex(i);
             break;
           }

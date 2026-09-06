@@ -327,7 +327,16 @@ export function Calendar({
                   const singleDayRange = isStart && isEnd;
 
                   return (
-                    <div key={di} className="relative flex h-9 items-center justify-center">
+                    <div
+                      key={di}
+                      className={cn(
+                        "relative flex h-9 items-center justify-center",
+                        // The day button is `pointer-events-none` when disabled, so
+                        // hover falls through to this cell — surface the not-allowed
+                        // cursor here (a disabled <button> ignores the CSS cursor).
+                        disabled && "cursor-not-allowed",
+                      )}
+                    >
                       {inRange && !singleDayRange ? (
                         // Range band — full cell width so it covers the endpoint circle,
                         // inset 2px top/bottom so week rows keep a visible gap.
@@ -357,7 +366,10 @@ export function Calendar({
                         className={cn(
                           "relative flex size-8 cursor-pointer items-center justify-center rounded-full text-sm transition-colors",
                           "hover:bg-mint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf/40",
-                          "disabled:pointer-events-none disabled:cursor-default disabled:text-muted/40 disabled:line-through",
+                          // Disabled day: dimmed everywhere; not-allowed cursor on
+                          // pointer devices (see the cell), and — since touch has no
+                          // cursor — a strike-through only where there's no hover.
+                          "disabled:pointer-events-none disabled:text-muted/40 [@media(hover:none)]:disabled:line-through",
                           outside && "text-muted/50",
                           !outside && !isEndpoint && "text-ink",
                           today && !isEndpoint && "font-semibold text-leaf",
