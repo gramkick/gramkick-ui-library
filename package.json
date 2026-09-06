@@ -1,6 +1,6 @@
 {
   "name": "@gramkick/ui",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "GramKick reusable React component library — tokens, primitives, and accessible components shared across the GramKick front-ends.",
   "license": "MIT",
   "repository": {
