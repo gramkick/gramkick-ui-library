@@ -265,10 +265,11 @@ function compareValues(a: unknown, b: unknown): number {
  * Compact page list: always the first two and last two pages, with the current
  * page floating between ellipses in the middle —
  * `1 2 … 5 … 9 10`. On the first/last two pages there is no middle number, so it
- * collapses to `1 2 … 9 10`.
+ * collapses to `1 2 … 9 10`. Up to 5 pages every number is shown; from 6 the
+ * windowed form kicks in (`1 2 … 4 … 5 6`).
  */
 export function pageRange(current: number, count: number): (number | "gap")[] {
-  if (count <= 7) return Array.from({ length: count }, (_, i) => i + 1);
+  if (count <= 5) return Array.from({ length: count }, (_, i) => i + 1);
   const middle = current > 2 && current < count - 1 ? current : null;
   return middle == null
     ? [1, 2, "gap", count - 1, count]

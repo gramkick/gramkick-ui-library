@@ -326,7 +326,12 @@ describe("DataTable", () => {
     expect(pageRange(4, 10)).toEqual([1, 2, "gap", 4, "gap", 9, 10]);
     expect(pageRange(9, 10)).toEqual([1, 2, "gap", 9, 10]);
     expect(pageRange(10, 10)).toEqual([1, 2, "gap", 9, 10]);
-    expect(pageRange(3, 6)).toEqual([1, 2, 3, 4, 5, 6]); // small count -> every page
+    expect(pageRange(3, 5)).toEqual([1, 2, 3, 4, 5]); // up to 5 -> every page
+    // from 6 the windowed form kicks in
+    expect(pageRange(1, 6)).toEqual([1, 2, "gap", 5, 6]);
+    expect(pageRange(4, 6)).toEqual([1, 2, "gap", 4, "gap", 5, 6]);
+    expect(pageRange(4, 7)).toEqual([1, 2, "gap", 4, "gap", 6, 7]);
+    expect(pageRange(7, 7)).toEqual([1, 2, "gap", 6, 7]);
   });
 
   it("does not force column widths unless a column asks for one", () => {
