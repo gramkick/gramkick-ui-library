@@ -105,6 +105,72 @@ export { UploadCloudIcon } from "./upload-cloud-icon";
 export { CameraIcon } from "./camera-icon";
 export { BriefcaseIcon } from "./briefcase-icon";
 
+// --- social / messaging brand marks + extended e-commerce set (added later) ---
+export { WhatsAppIcon } from "./whatsapp-icon";
+export { FacebookIcon } from "./facebook-icon";
+export { MessengerIcon } from "./messenger-icon";
+export { InstagramIcon } from "./instagram-icon";
+export { TwitterXIcon } from "./twitter-x-icon";
+export { YouTubeIcon } from "./youtube-icon";
+export { LinkedInIcon } from "./linkedin-icon";
+export { TelegramIcon } from "./telegram-icon";
+export { PinterestIcon } from "./pinterest-icon";
+export { SnapchatIcon } from "./snapchat-icon";
+export { ThreadsIcon } from "./threads-icon";
+export { GoogleIcon } from "./google-icon";
+export { AppleIcon } from "./apple-icon";
+export { SendIcon } from "./send-icon";
+export { SendHorizontalIcon } from "./send-horizontal-icon";
+export { MessageSquareTextIcon } from "./message-square-text-icon";
+export { MessagesSquareIcon } from "./messages-square-icon";
+export { AtSignIcon } from "./at-sign-icon";
+export { PhoneCallIcon } from "./phone-call-icon";
+export { LifeBuoyIcon } from "./life-buoy-icon";
+export { BellRingIcon } from "./bell-ring-icon";
+export { MegaphoneIcon } from "./megaphone-icon";
+export { LogInIcon } from "./log-in-icon";
+export { UserPlusIcon } from "./user-plus-icon";
+export { UserCheckIcon } from "./user-check-icon";
+export { UserXIcon } from "./user-x-icon";
+export { CircleUserIcon } from "./circle-user-icon";
+export { KeyRoundIcon } from "./key-round-icon";
+export { ShieldIcon } from "./shield-icon";
+export { IdCardIcon } from "./id-card-icon";
+export { LinkIcon } from "./link-icon";
+export { TagsIcon } from "./tags-icon";
+export { LayersIcon } from "./layers-icon";
+export { RulerIcon } from "./ruler-icon";
+export { ScaleIcon } from "./scale-icon";
+export { WeightIcon } from "./weight-icon";
+export { CrownIcon } from "./crown-icon";
+export { TicketCheckIcon } from "./ticket-check-icon";
+export { BadgeIndianRupeeIcon } from "./badge-indian-rupee-icon";
+export { GaugeIcon } from "./gauge-icon";
+export { ShoppingBasketIcon } from "./shopping-basket-icon";
+export { UndoIcon } from "./undo-icon";
+export { HistoryIcon } from "./history-icon";
+export { TimerIcon } from "./timer-icon";
+export { ClipboardCheckIcon } from "./clipboard-check-icon";
+export { PackageXIcon } from "./package-x-icon";
+export { StarHalfIcon } from "./star-half-icon";
+export { BikeIcon } from "./bike-icon";
+export { MapIcon } from "./map-icon";
+export { NavigationIcon } from "./navigation-icon";
+export { RouteIcon } from "./route-icon";
+export { MapPinnedIcon } from "./map-pinned-icon";
+export { LandmarkIcon } from "./landmark-icon";
+export { ScanLineIcon } from "./scan-line-icon";
+export { InboxIcon } from "./inbox-icon";
+export { ImageIcon } from "./image-icon";
+export { ImageOffIcon } from "./image-off-icon";
+export { GridIcon } from "./grid-icon";
+export { ChevronsLeftIcon } from "./chevrons-left-icon";
+export { ChevronsRightIcon } from "./chevrons-right-icon";
+export { ArrowLeftRightIcon } from "./arrow-left-right-icon";
+export { BuildingIcon } from "./building-icon";
+export { ThumbsDownIcon } from "./thumbs-down-icon";
+export { SmileIcon } from "./smile-icon";
+
 import { ChevronUpIcon } from "./chevron-up-icon";
 import { ChevronDownIcon } from "./chevron-down-icon";
 import { ChevronLeftIcon } from "./chevron-left-icon";
@@ -211,6 +277,70 @@ import { FileTextIcon } from "./file-text-icon";
 import { UploadCloudIcon } from "./upload-cloud-icon";
 import { CameraIcon } from "./camera-icon";
 import { BriefcaseIcon } from "./briefcase-icon";
+import { WhatsAppIcon } from "./whatsapp-icon";
+import { FacebookIcon } from "./facebook-icon";
+import { MessengerIcon } from "./messenger-icon";
+import { InstagramIcon } from "./instagram-icon";
+import { TwitterXIcon } from "./twitter-x-icon";
+import { YouTubeIcon } from "./youtube-icon";
+import { LinkedInIcon } from "./linkedin-icon";
+import { TelegramIcon } from "./telegram-icon";
+import { PinterestIcon } from "./pinterest-icon";
+import { SnapchatIcon } from "./snapchat-icon";
+import { ThreadsIcon } from "./threads-icon";
+import { GoogleIcon } from "./google-icon";
+import { AppleIcon } from "./apple-icon";
+import { SendIcon } from "./send-icon";
+import { SendHorizontalIcon } from "./send-horizontal-icon";
+import { MessageSquareTextIcon } from "./message-square-text-icon";
+import { MessagesSquareIcon } from "./messages-square-icon";
+import { AtSignIcon } from "./at-sign-icon";
+import { PhoneCallIcon } from "./phone-call-icon";
+import { LifeBuoyIcon } from "./life-buoy-icon";
+import { BellRingIcon } from "./bell-ring-icon";
+import { MegaphoneIcon } from "./megaphone-icon";
+import { LogInIcon } from "./log-in-icon";
+import { UserPlusIcon } from "./user-plus-icon";
+import { UserCheckIcon } from "./user-check-icon";
+import { UserXIcon } from "./user-x-icon";
+import { CircleUserIcon } from "./circle-user-icon";
+import { KeyRoundIcon } from "./key-round-icon";
+import { ShieldIcon } from "./shield-icon";
+import { IdCardIcon } from "./id-card-icon";
+import { LinkIcon } from "./link-icon";
+import { TagsIcon } from "./tags-icon";
+import { LayersIcon } from "./layers-icon";
+import { RulerIcon } from "./ruler-icon";
+import { ScaleIcon } from "./scale-icon";
+import { WeightIcon } from "./weight-icon";
+import { CrownIcon } from "./crown-icon";
+import { TicketCheckIcon } from "./ticket-check-icon";
+import { BadgeIndianRupeeIcon } from "./badge-indian-rupee-icon";
+import { GaugeIcon } from "./gauge-icon";
+import { ShoppingBasketIcon } from "./shopping-basket-icon";
+import { UndoIcon } from "./undo-icon";
+import { HistoryIcon } from "./history-icon";
+import { TimerIcon } from "./timer-icon";
+import { ClipboardCheckIcon } from "./clipboard-check-icon";
+import { PackageXIcon } from "./package-x-icon";
+import { StarHalfIcon } from "./star-half-icon";
+import { BikeIcon } from "./bike-icon";
+import { MapIcon } from "./map-icon";
+import { NavigationIcon } from "./navigation-icon";
+import { RouteIcon } from "./route-icon";
+import { MapPinnedIcon } from "./map-pinned-icon";
+import { LandmarkIcon } from "./landmark-icon";
+import { ScanLineIcon } from "./scan-line-icon";
+import { InboxIcon } from "./inbox-icon";
+import { ImageIcon } from "./image-icon";
+import { ImageOffIcon } from "./image-off-icon";
+import { GridIcon } from "./grid-icon";
+import { ChevronsLeftIcon } from "./chevrons-left-icon";
+import { ChevronsRightIcon } from "./chevrons-right-icon";
+import { ArrowLeftRightIcon } from "./arrow-left-right-icon";
+import { BuildingIcon } from "./building-icon";
+import { ThumbsDownIcon } from "./thumbs-down-icon";
+import { SmileIcon } from "./smile-icon";
 
 /** Every icon component, keyed by name — handy for galleries and docs. */
 export const icons = {
@@ -320,6 +450,70 @@ export const icons = {
   UploadCloudIcon,
   CameraIcon,
   BriefcaseIcon,
+  WhatsAppIcon,
+  FacebookIcon,
+  MessengerIcon,
+  InstagramIcon,
+  TwitterXIcon,
+  YouTubeIcon,
+  LinkedInIcon,
+  TelegramIcon,
+  PinterestIcon,
+  SnapchatIcon,
+  ThreadsIcon,
+  GoogleIcon,
+  AppleIcon,
+  SendIcon,
+  SendHorizontalIcon,
+  MessageSquareTextIcon,
+  MessagesSquareIcon,
+  AtSignIcon,
+  PhoneCallIcon,
+  LifeBuoyIcon,
+  BellRingIcon,
+  MegaphoneIcon,
+  LogInIcon,
+  UserPlusIcon,
+  UserCheckIcon,
+  UserXIcon,
+  CircleUserIcon,
+  KeyRoundIcon,
+  ShieldIcon,
+  IdCardIcon,
+  LinkIcon,
+  TagsIcon,
+  LayersIcon,
+  RulerIcon,
+  ScaleIcon,
+  WeightIcon,
+  CrownIcon,
+  TicketCheckIcon,
+  BadgeIndianRupeeIcon,
+  GaugeIcon,
+  ShoppingBasketIcon,
+  UndoIcon,
+  HistoryIcon,
+  TimerIcon,
+  ClipboardCheckIcon,
+  PackageXIcon,
+  StarHalfIcon,
+  BikeIcon,
+  MapIcon,
+  NavigationIcon,
+  RouteIcon,
+  MapPinnedIcon,
+  LandmarkIcon,
+  ScanLineIcon,
+  InboxIcon,
+  ImageIcon,
+  ImageOffIcon,
+  GridIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
+  ArrowLeftRightIcon,
+  BuildingIcon,
+  ThumbsDownIcon,
+  SmileIcon,
 } as const;
 
 /** Union of every exported icon name. */

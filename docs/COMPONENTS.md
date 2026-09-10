@@ -114,42 +114,47 @@ import { cn, type DateRange } from "@gramkick/ui";
 
 ## Component index
 
-| Component                                                                         | What it is                                                                         |
-| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| [`Button`](#button)                                                               | Primary action. 6 variants, icon slots, loading state, `asChild`.                  |
-| [`MenuButton`](#menubutton)                                                       | A `Button` that opens a keyboard-navigable action menu.                            |
-| [`Badge`](#badge)                                                                 | Status pill — 6 tones × 3 sizes, optional icons.                                   |
-| [`Card`](#card) + parts                                                           | Surface container + `CardHeader` / `Title` / `Description` / `Content` / `Footer`. |
-| [`EmptyState`](#emptystate)                                                       | Placeholder for empty / error / no-results regions.                                |
-| [`Skeleton`](#skeleton)                                                           | Loading placeholder — text / rounded / rect / circle, pulse or shimmer.            |
-| [`Spinner`](#spinner)                                                             | Indeterminate loading indicator.                                                   |
-| [`Steps`](#steps)                                                                 | Progress stepper, or a segmented strength / completion track.                      |
-| [`Text` / `Heading`](#typography)                                                 | One primitive for every text role (see [Typography](#typography)).                 |
-| [`Input`](#input)                                                                 | Text field with icons, edge selects, keystroke filtering.                          |
-| [`Dropdown`](#dropdown)                                                           | From-scratch single / multi select, searchable, groupable.                         |
-| [`ListItems`](#listitems)                                                         | The `Dropdown` option list on its own, in a card.                                  |
-| [`Autosuggest`](#autosuggest)                                                     | Typeahead with async loading, multi-select, create-new.                            |
-| [`Checkbox` / `Radio`](#checkbox--radio--groups) + `CheckboxGroup` / `RadioGroup` | Selection controls, 4 tones × 3 sizes.                                             |
-| [`Switch`](#switch)                                                               | On/off toggle, native `<input role="switch">`.                                     |
-| [`FileUpload`](#fileupload)                                                       | File picker + drop zone, 3 variants, preview + reject rules.                       |
-| [`Calendar`](#calendar)                                                           | Month grid — the primitive behind the date pickers.                                |
-| [`DatePicker`](#datepicker)                                                       | Single-date field + calendar popover.                                              |
-| [`DateRangePicker`](#daterangepicker)                                             | Start/end field + two-month range calendar, presets.                               |
-| [`TimePicker`](#timepicker)                                                       | Time field + column picker popover.                                                |
-| [`DropdownRangePicker`](#dropdownrangepicker)                                     | Range field whose popover is a preset list + custom range.                         |
-| [`Tabs`](#tabs) + parts                                                           | Tabbed navigation — 4 variants, data or composed API.                              |
-| [`Dialog`](#dialog) + primitives                                                  | Prop-driven dialog (responsive sheet/modal) + Radix primitives.                    |
-| [`Tooltip`](#tooltip)                                                             | Hover / focus / click tooltip, auto-flipping, rich content.                        |
-| [`Toast`](#toast) (`ToastMessenger` / `useToast` / `ToastProvider`)               | Imperative toasts, callable anywhere.                                              |
-| [`DataTable`](#datatable)                                                         | Sortable, selectable, paginated, responsive table.                                 |
-| [Icons](#icons)                                                                   | 105 tree-shakeable SVG icons + `createIcon` (incl. the `GramKickIcon` brand mark).                                        |
+| Component                                                                         | What it is                                                                                                  |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| [`Button`](#button)                                                               | Primary action. 6 variants, icon slots, loading state, `asChild`.                                           |
+| [`MenuButton`](#menubutton)                                                       | A `Button` that opens a keyboard-navigable action menu.                                                     |
+| [`Badge`](#badge)                                                                 | Status pill — 6 tones × 3 sizes, optional icons.                                                            |
+| [`Card`](#card) + parts                                                           | Surface container + `CardHeader` / `Title` / `Description` / `Content` / `Footer`.                          |
+| [`EmptyState`](#emptystate)                                                       | Placeholder for empty / error / no-results regions.                                                         |
+| [`Skeleton`](#skeleton)                                                           | Loading placeholder — text / rounded / rect / circle, pulse or shimmer.                                     |
+| [`Spinner`](#spinner)                                                             | Indeterminate loading indicator.                                                                            |
+| [`Steps`](#steps)                                                                 | Progress stepper, or a segmented strength / completion track.                                               |
+| [`Text` / `Heading`](#typography)                                                 | One primitive for every text role (see [Typography](#typography)).                                          |
+| [`Input`](#input)                                                                 | Text field with icons, edge selects, keystroke filtering.                                                   |
+| [`Dropdown`](#dropdown)                                                           | From-scratch single / multi select, searchable, groupable.                                                  |
+| [`ListItems`](#listitems)                                                         | The `Dropdown` option list on its own, in a card.                                                           |
+| [`Autosuggest`](#autosuggest)                                                     | Typeahead with async loading, multi-select, create-new.                                                     |
+| [`Checkbox` / `Radio`](#checkbox--radio--groups) + `CheckboxGroup` / `RadioGroup` | Selection controls, 4 tones × 3 sizes.                                                                      |
+| [`Switch`](#switch)                                                               | On/off toggle, native `<input role="switch">`.                                                              |
+| [`FileUpload`](#fileupload)                                                       | File picker + drop zone, 3 variants, preview + reject rules.                                                |
+| [`Calendar`](#calendar)                                                           | Month grid — the primitive behind the date pickers.                                                         |
+| [`DatePicker`](#datepicker)                                                       | Single-date field + calendar popover.                                                                       |
+| [`DateRangePicker`](#daterangepicker)                                             | Start/end field + two-month range calendar, presets.                                                        |
+| [`TimePicker`](#timepicker)                                                       | Time field + column picker popover.                                                                         |
+| [`DropdownRangePicker`](#dropdownrangepicker)                                     | Range field whose popover is a preset list + custom range.                                                  |
+| [`Tabs`](#tabs) + parts                                                           | Tabbed navigation — 4 variants, data or composed API.                                                       |
+| [`Dialog`](#dialog) + primitives                                                  | Prop-driven dialog (responsive sheet/modal) + Radix primitives.                                             |
+| [`Tooltip`](#tooltip)                                                             | Hover / focus / click tooltip, auto-flipping, rich content.                                                 |
+| [`Toast`](#toast) (`ToastMessenger` / `useToast` / `ToastProvider`)               | Imperative toasts, callable anywhere.                                                                       |
+| [`DataTable`](#datatable)                                                         | Sortable, selectable, paginated, responsive table.                                                          |
+| [Icons](#icons)                                                                   | 170 tree-shakeable SVG icons + `createIcon` (incl. `GramKickIcon` and monochrome social / messaging logos). |
 
 ---
 
 ## Icons
 
-105 SVG icons, each built with `createIcon` so they share one prop contract.
-Colour flows from `currentColor`, so `text-*` utilities tint them.
+170 SVG icons, each built with `createIcon` so they share one prop contract.
+Colour flows from `currentColor`, so `text-*` utilities tint them. Most are
+Lucide-style outline icons; the social / messaging marks (`WhatsAppIcon`,
+`InstagramIcon`, `FacebookIcon`, `MessengerIcon`, `TelegramIcon`, `TwitterXIcon`,
+`YouTubeIcon`, `LinkedInIcon`, `PinterestIcon`, `SnapchatIcon`, `ThreadsIcon`,
+`GoogleIcon`, `AppleIcon`) are solid monochrome brand glyphs — they still tint
+with `text-*` and ignore `strokeWidth`.
 
 ```tsx
 import { ShoppingCartIcon, TruckIcon, RupeeIcon } from "@gramkick/ui/icons";
@@ -839,7 +844,13 @@ edge selects, and keystroke filtering.
 {
   /* multi-line — renders a <textarea> */
 }
-<Input label="Description" multiline rows={4} value={desc} onChange={(e) => setDesc(e.target.value)} />;
+<Input
+  label="Description"
+  multiline
+  rows={4}
+  value={desc}
+  onChange={(e) => setDesc(e.target.value)}
+/>;
 ```
 
 ```tsx
