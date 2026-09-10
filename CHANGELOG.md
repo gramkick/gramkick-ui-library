@@ -1,5 +1,38 @@
 # @gramkick/ui
 
+## 0.4.0
+
+### Minor Changes
+
+- 98af3c8: **64 new icons** (icon set is now 170).
+
+  - **Social / messaging brand marks** — solid monochrome logos, `variant: "fill"`,
+    tint with `text-*`: `WhatsAppIcon`, `FacebookIcon`, `MessengerIcon`,
+    `InstagramIcon`, `TelegramIcon`, `TwitterXIcon`, `YouTubeIcon`, `LinkedInIcon`,
+    `PinterestIcon`, `SnapchatIcon`, `ThreadsIcon`, plus `GoogleIcon` / `AppleIcon`
+    for social sign-in.
+  - **Extended e-commerce / product set** (Lucide-style outline): `SendIcon`,
+    `SendHorizontalIcon`, `MessageSquareTextIcon`, `MessagesSquareIcon`,
+    `AtSignIcon`, `PhoneCallIcon`, `LifeBuoyIcon`, `BellRingIcon`, `MegaphoneIcon`,
+    `LogInIcon`, `UserPlusIcon`, `UserCheckIcon`, `UserXIcon`, `CircleUserIcon`,
+    `KeyRoundIcon`, `ShieldIcon`, `IdCardIcon`, `LinkIcon`, `TagsIcon`,
+    `LayersIcon`, `RulerIcon`, `ScaleIcon`, `WeightIcon`, `CrownIcon`,
+    `TicketCheckIcon`, `BadgeIndianRupeeIcon`, `GaugeIcon`, `ShoppingBasketIcon`,
+    `UndoIcon`, `HistoryIcon`, `TimerIcon`, `ClipboardCheckIcon`, `PackageXIcon`,
+    `StarHalfIcon`, `BikeIcon`, `MapIcon`, `NavigationIcon`, `RouteIcon`,
+    `MapPinnedIcon`, `LandmarkIcon`, `ScanLineIcon`, `InboxIcon`, `ImageIcon`,
+    `ImageOffIcon`, `GridIcon`, `ChevronsLeftIcon`, `ChevronsRightIcon`,
+    `ArrowLeftRightIcon`, `BuildingIcon`, `ThumbsDownIcon`, `SmileIcon`.
+
+  All flow through `createIcon`, so the `size` / `color` / `title` contract and the
+  `icons` map / `IconName` union pick them up automatically.
+
+### Patch Changes
+
+- a57bd1f: `DataTable` pagination: the windowed page list (`1 2 … 4 … 5 6`) now kicks in
+  from **6** pages instead of 8. Up to 5 pages every number is still shown in
+  full; `pageRange(current, count)` is the only change.
+
 ## 0.3.0
 
 ### Minor Changes
