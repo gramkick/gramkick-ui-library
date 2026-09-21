@@ -1,5 +1,12 @@
 # @gramkick/ui
 
+## 0.5.0
+
+### Minor Changes
+
+- 3ac276f: changes
+- 9b3818b: pagination fixes for responsive
+
 ## 0.4.0
 
 ### Minor Changes
