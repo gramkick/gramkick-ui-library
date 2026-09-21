@@ -773,7 +773,7 @@ export function DataTable<T>({
   const goto = (p: number) => setPage(Math.min(Math.max(1, p), pageCount));
 
   const navBtn =
-    "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-gk-sm border border-line text-muted transition-colors hover:bg-mint hover:text-ink disabled:pointer-events-none disabled:opacity-40 sm:size-8";
+    "flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-gk-sm border border-line text-muted transition-colors hover:bg-mint hover:text-ink disabled:pointer-events-none disabled:opacity-40 sm:size-8";
 
   const footer = showFooter ? (
     <div className="flex flex-col gap-3 border-t border-line px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -821,7 +821,7 @@ export function DataTable<T>({
               aria-current={p === currentPage ? "page" : undefined}
               onClick={() => goto(p)}
               className={cn(
-                "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-gk-sm border text-sm transition-colors sm:size-8",
+                "flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-gk-sm border text-sm transition-colors sm:size-8",
                 p === currentPage
                   ? "border-leaf bg-leaf font-semibold text-white"
                   : "border-line text-ink hover:bg-mint",
