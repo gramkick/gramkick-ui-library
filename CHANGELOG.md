@@ -1,5 +1,15 @@
 # @gramkick/ui
 
+## 0.6.0
+
+### Minor Changes
+
+- 7a33856: `Dropdown` and `Autosuggest` gain a `maxHeight` prop to cap the scrollable options list's height (number = px, string used as-is, e.g. `"50vh"`). Default stays `320` (px), matching prior behavior.
+
+### Patch Changes
+
+- d92faf6: changes
+
 ## 0.5.1
 
 ### Patch Changes
