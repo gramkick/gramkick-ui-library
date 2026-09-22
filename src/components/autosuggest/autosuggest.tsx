@@ -176,6 +176,8 @@ export interface AutosuggestProps extends VariantProps<typeof autosuggestFieldVa
   className?: string;
   containerClassName?: string;
   menuClassName?: string;
+  /** Cap on the scrollable options list's height — a number is px, a string is used as-is (e.g. `"50vh"`). Default `320` (px). */
+  maxHeight?: number | string;
 }
 
 /**
@@ -230,6 +232,7 @@ export function Autosuggest({
   className,
   containerClassName,
   menuClassName,
+  maxHeight = 320,
 }: AutosuggestProps) {
   const autoId = useId();
   const id = idProp ?? autoId;
@@ -564,7 +567,8 @@ export function Autosuggest({
       role="listbox"
       aria-multiselectable={multiple || undefined}
       aria-labelledby={label != null ? labelId : undefined}
-      className="max-h-[320px] overflow-y-auto py-1"
+      className="overflow-y-auto py-1"
+      style={{ maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight }}
     >
       {list.map((o, i) => {
         const isSelected = selectedValues.includes(o.value);

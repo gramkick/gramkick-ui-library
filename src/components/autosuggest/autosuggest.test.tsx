@@ -50,6 +50,24 @@ describe("Autosuggest", () => {
     ]);
   });
 
+  it("caps the options list at 320px by default, and at a custom maxHeight when given", async () => {
+    const user = userEvent.setup();
+
+    const first = render(<Autosuggest options={CITIES} label="City" debounce={0} />);
+    await user.type(screen.getByRole("combobox"), "m");
+    expect(screen.getByRole("listbox")).toHaveStyle({ maxHeight: "320px" });
+    first.unmount();
+
+    const second = render(<Autosuggest options={CITIES} label="City" debounce={0} maxHeight={480} />);
+    await user.type(screen.getByRole("combobox"), "m");
+    expect(screen.getByRole("listbox")).toHaveStyle({ maxHeight: "480px" });
+    second.unmount();
+
+    render(<Autosuggest options={CITIES} label="City" debounce={0} maxHeight="50vh" />);
+    await user.type(screen.getByRole("combobox"), "m");
+    expect(screen.getByRole("listbox")).toHaveStyle({ maxHeight: "50vh" });
+  });
+
   it("single select: fills the input, closes, fires onChange", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

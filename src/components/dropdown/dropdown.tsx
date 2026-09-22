@@ -176,6 +176,8 @@ export interface DropdownProps extends VariantProps<typeof dropdownTriggerVarian
   className?: string;
   containerClassName?: string;
   menuClassName?: string;
+  /** Cap on the scrollable options list's height — a number is px, a string is used as-is (e.g. `"50vh"`). Default `320` (px). */
+  maxHeight?: number | string;
 }
 
 const asText = (v: unknown): string =>
@@ -224,6 +226,7 @@ export function Dropdown({
   className,
   containerClassName,
   menuClassName,
+  maxHeight = 320,
 }: DropdownProps) {
   const autoId = useId();
   const id = idProp ?? autoId;
@@ -670,7 +673,8 @@ export function Dropdown({
               role="listbox"
               aria-multiselectable={multiple || undefined}
               aria-labelledby={label != null ? labelId : undefined}
-              className="max-h-[320px] overflow-y-auto py-1"
+              className="overflow-y-auto py-1"
+              style={{ maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight }}
             >
               {!navRows.some((r) => r.kind === "option") ? (
                 <li role="presentation" className="px-3 py-6 text-center text-sm text-muted">

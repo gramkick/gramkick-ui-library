@@ -63,6 +63,21 @@ describe("Dropdown", () => {
     expect(options[3]!).toHaveAttribute("aria-disabled", "true");
   });
 
+  it("caps the options list at 320px by default, and at a custom maxHeight when given", async () => {
+    const user = userEvent.setup();
+
+    const first = render(<Dropdown options={OPTIONS} label="City" />);
+    expect(await open(user)).toHaveStyle({ maxHeight: "320px" });
+    first.unmount();
+
+    const second = render(<Dropdown options={OPTIONS} label="City" maxHeight={480} />);
+    expect(await open(user)).toHaveStyle({ maxHeight: "480px" });
+    second.unmount();
+
+    render(<Dropdown options={OPTIONS} label="City" maxHeight="50vh" />);
+    expect(await open(user)).toHaveStyle({ maxHeight: "50vh" });
+  });
+
   it("single select: picks an option, closes, reflects the label, fires onChange", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
