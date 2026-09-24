@@ -80,7 +80,7 @@ describe("Autosuggest", () => {
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   });
 
-  it("multi select: chips render at the bottom of the menu and the input clears", async () => {
+  it("multi select: rows have checkboxes, several can be ticked from one search, chips sit at the bottom", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     render(
@@ -88,12 +88,16 @@ describe("Autosuggest", () => {
     );
     const input = screen.getByRole("combobox");
 
-    await user.type(input, "mum");
-    await user.click(screen.getByRole("option", { name: /Mumbai/ }));
+    // "u" matches several cities — tick two of them without retyping.
+    await user.type(input, "u");
+    const mumbai = screen.getByRole("option", { name: /Mumbai/ });
+    expect(mumbai).toHaveAttribute("aria-selected", "false");
+    await user.click(mumbai);
     expect(onChange).toHaveBeenLastCalledWith(["mum"]);
-    expect(input).toHaveValue("");
+    expect(input).toHaveValue("u");
+    expect(screen.getByRole("option", { name: /Mumbai/ })).toHaveAttribute("aria-selected", "true");
 
-    // with a fresh query the list is back — the Mumbai chip sits after it in the menu
+    await user.clear(input);
     await user.type(input, "del");
     const list = screen.getByRole("listbox");
     const chip = screen.getByText("Mumbai"); // only present as a chip now
@@ -102,8 +106,12 @@ describe("Autosuggest", () => {
     await user.click(screen.getByRole("option", { name: /New Delhi/ }));
     expect(onChange).toHaveBeenLastCalledWith(["mum", "del"]);
 
+    // un-ticking a row from the list removes it again
+    await user.click(screen.getByRole("option", { name: /New Delhi/ }));
+    expect(onChange).toHaveBeenLastCalledWith(["mum"]);
+
     await user.click(screen.getByRole("button", { name: "Remove Mumbai" }));
-    expect(onChange).toHaveBeenLastCalledWith(["del"]);
+    expect(onChange).toHaveBeenLastCalledWith([]);
   });
 
   it("multi: chips show in the field when blurred and move into the menu when focused", async () => {
@@ -323,6 +331,7 @@ describe("Autosuggest (controlled)", () => {
     render(<Host />);
     await user.type(screen.getByRole("combobox"), "beng");
     await user.click(screen.getByRole("option", { name: /Bengaluru/ }));
-    expect(screen.getByText("Bengaluru")).toBeInTheDocument();
+    // the row stays in the list (ticked) and the chip appears below it
+    expect(screen.getByRole("button", { name: "Remove Bengaluru" })).toBeInTheDocument();
   });
 });

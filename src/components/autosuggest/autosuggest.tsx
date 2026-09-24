@@ -47,6 +47,21 @@ function CrossIcon({ className }: { className?: string }) {
   );
 }
 
+function TickIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
+      <path d="M3.5 8.5l3 3 6-7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /* ------------------------------------------------------------------ types -- */
 
 export interface AutosuggestOption {
@@ -187,8 +202,10 @@ export interface AutosuggestProps extends VariantProps<typeof autosuggestFieldVa
  * (`label` / `subtext` / `tertiary` / `icon`), keyboard + ARIA combobox, and a
  * menu that flips upward when short of room.
  *
- * In multi mode the selected chips render in a row **at the bottom of the menu**
- * (below the suggestions); the input clears after each pick.
+ * In multi mode each row has a checkbox, several rows can be ticked from one
+ * search (the query and fetched list stay put; the previous rows stay visible
+ * while a new keyword loads), and the selected chips render in a row **at the
+ * bottom of the menu** (below the suggestions).
  */
 export function Autosuggest({
   options,
@@ -408,8 +425,8 @@ export function Autosuggest({
             ? selectedValues.filter((v) => v !== opt.value)
             : [...selectedValues, opt.value],
         );
-        setQuery("");
-        inputChangeRef.current?.("");
+        // Multi: keep the query (and so the fetched list) as-is — the user
+        // ticks several rows from one search; only typing changes the list.
         inputRef.current?.focus();
       } else {
         commit([opt.value]);
@@ -550,7 +567,10 @@ export function Autosuggest({
     open && activeIndex >= 0 && list[activeIndex] ? `${listboxId}-opt-${activeIndex}` : undefined;
   const showClear = clearable && (hasValue || query.length > 0) && !disabled && !readOnly;
 
-  const menuBody: ReactNode = loading ? (
+  // Multi keeps the already-fetched rows on screen while a new keyword loads
+  // (the field's spinner shows progress) instead of blanking the whole list.
+  const showLoadingOnly = loading && !(multiple && list.length > 0);
+  const menuBody: ReactNode = showLoadingOnly ? (
     <div className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-muted">
       <Spinner size="sm" label="" />
       {loadingMessage}
@@ -596,6 +616,17 @@ export function Autosuggest({
               isSelected && !active && "bg-mint/50",
             )}
           >
+            {multiple ? (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "flex size-4 shrink-0 items-center justify-center rounded border transition-colors",
+                  isSelected ? "border-leaf bg-leaf text-white" : "border-line bg-canvas",
+                )}
+              >
+                {isSelected ? <TickIcon className="size-3" /> : null}
+              </span>
+            ) : null}
             {o.icon ? <span className="flex shrink-0 text-muted">{o.icon}</span> : null}
             <span className="min-w-0 flex-1">
               <span className="block truncate font-medium text-ink">{o.label}</span>
