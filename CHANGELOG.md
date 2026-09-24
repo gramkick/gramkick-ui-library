@@ -1,5 +1,11 @@
 # @gramkick/ui
 
+## 0.6.1
+
+### Patch Changes
+
+- 61e2cdc: auto suggest multi seletc fixes
+
 ## 0.6.0
 
 ### Minor Changes
