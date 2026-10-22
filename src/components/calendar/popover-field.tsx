@@ -83,6 +83,11 @@ export interface DateFieldBaseProps extends VariantProps<typeof dateFieldVariant
   className?: string;
   containerClassName?: string;
   popoverClassName?: string;
+  /**
+   * Which edge of the field the popover lines up with: `"start"` (left), `"end"` (right) or `"auto"` (default — starts
+   * at the left edge, but flips to the right edge when it would run off the screen, e.g. a field in a right column).
+   */
+  align?: "start" | "end" | "auto";
 }
 
 const MAX_POPOVER_HEIGHT = 420;
@@ -122,6 +127,7 @@ export function PopoverField({
   className,
   containerClassName,
   popoverClassName,
+  align = "auto",
 }: PopoverFieldProps) {
   const autoId = useId();
   const id = idProp ?? autoId;
@@ -138,6 +144,7 @@ export function PopoverField({
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const [placement, setPlacement] = useState<"bottom" | "top">("bottom");
+  const [autoAlign, setAutoAlign] = useState<"start" | "end">("start");
 
   const toggle = useCallback(() => {
     if (disabled || readOnly) return;
@@ -163,6 +170,12 @@ export function PopoverField({
       const below = window.innerHeight - rect.bottom;
       const above = rect.top;
       setPlacement(below < h + 8 && above > below ? "top" : "bottom");
+      // Auto-align: keep the left edge unless the popover would overflow the viewport on the right and there's room to
+      // line its right edge up with the field instead.
+      const width = popoverRef.current?.offsetWidth ?? 0;
+      const overflowsRight = rect.left + width > window.innerWidth - 8;
+      const fitsFromRight = rect.right - width >= 8;
+      setAutoAlign(overflowsRight && fitsFromRight ? "end" : "start");
     };
     update();
     window.addEventListener("resize", update);
@@ -249,7 +262,7 @@ export function PopoverField({
               "absolute z-50 rounded-gk-md border border-line bg-surface p-3 shadow-modal",
               placement === "top" ? "bottom-full mb-1" : "top-full mt-1",
               popoverWidth === "auto"
-                ? "left-0 w-max min-w-full max-w-[calc(100vw-1.5rem)]"
+                ? cn("w-max min-w-full max-w-[calc(100vw-1.5rem)]", (align === "auto" ? autoAlign : align) === "end" ? "right-0" : "left-0")
                 : "inset-x-0",
               popoverClassName,
             )}
