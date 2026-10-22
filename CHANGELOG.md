@@ -1,5 +1,11 @@
 # @gramkick/ui
 
+## 0.7.0
+
+### Minor Changes
+
+- 9a4aef8: DatePicker / DateRangePicker: new `align` prop (`"start" | "end" | "auto"`, default `"auto"`). The calendar popover now flips to the right edge of its field when it would otherwise run off the screen.
+
 ## 0.6.1
 
 ### Patch Changes
