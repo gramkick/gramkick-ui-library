@@ -11,6 +11,7 @@ import {
 } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
+import { RequiredMark } from "../required-mark";
 import { useControllableState } from "../../hooks/use-controllable-state";
 import { ChevronDownIcon as ChevronIcon, XIcon as CrossIcon, CheckIcon as TickIcon } from "../icon";
 
@@ -153,6 +154,8 @@ export interface DropdownProps extends VariantProps<typeof dropdownTriggerVarian
   disabled?: boolean;
   readOnly?: boolean;
   required?: boolean;
+  /** Shows the required mark + `aria-required` without native validation — same as `required` here, for one API across fields. */
+  isRequired?: boolean;
   id?: string;
 
   /* search */
@@ -213,6 +216,7 @@ export function Dropdown({
   disabled = false,
   readOnly = false,
   required = false,
+  isRequired = false,
   id: idProp,
   searchable = false,
   searchKeys,
@@ -556,7 +560,7 @@ export function Dropdown({
           onClick={() => !disabled && !readOnly && triggerRef.current?.focus()}
         >
           {label}
-          {required ? <span className="text-danger"> *</span> : null}
+          {required || isRequired ? <RequiredMark /> : null}
         </span>
       ) : null}
 
@@ -571,7 +575,7 @@ export function Dropdown({
           aria-disabled={disabled || undefined}
           aria-readonly={readOnly || undefined}
           aria-invalid={isInvalid || undefined}
-          aria-required={required || undefined}
+          aria-required={required || isRequired || undefined}
           aria-labelledby={label != null ? labelId : undefined}
           aria-describedby={describedBy}
           aria-activedescendant={!searchable ? activeDescendant : undefined}

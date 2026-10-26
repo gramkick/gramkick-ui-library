@@ -10,6 +10,7 @@ import {
 } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
+import { RequiredMark } from "../required-mark";
 
 function CalendarIcon({ className }: { className?: string }) {
   return (
@@ -78,6 +79,8 @@ export interface DateFieldBaseProps extends VariantProps<typeof dateFieldVariant
   disabled?: boolean;
   readOnly?: boolean;
   required?: boolean;
+  /** Shows the required mark + `aria-required` without native validation — same as `required` here, for one API across fields. */
+  isRequired?: boolean;
   clearable?: boolean;
   id?: string;
   className?: string;
@@ -122,6 +125,7 @@ export function PopoverField({
   disabled = false,
   readOnly = false,
   required = false,
+  isRequired = false,
   clearable = true,
   id: idProp,
   className,
@@ -209,7 +213,7 @@ export function PopoverField({
           onClick={() => !disabled && !readOnly && triggerRef.current?.focus()}
         >
           {label}
-          {required ? <span className="text-danger"> *</span> : null}
+          {required || isRequired ? <RequiredMark /> : null}
         </span>
       ) : null}
 
@@ -223,7 +227,7 @@ export function PopoverField({
           aria-disabled={disabled || undefined}
           aria-readonly={readOnly || undefined}
           aria-invalid={isInvalid || undefined}
-          aria-required={required || undefined}
+          aria-required={required || isRequired || undefined}
           aria-labelledby={label != null ? labelId : undefined}
           aria-describedby={describedBy}
           tabIndex={disabled ? -1 : 0}

@@ -34,6 +34,14 @@ describe("Input", () => {
     expect(field).toHaveValue("Line 1\nLine 2");
   });
 
+  it("isRequired shows the mark and aria-required without native validation", () => {
+    render(<Input label="Name" isRequired />);
+    const field = screen.getByLabelText(/Name/);
+    expect(screen.getByText("*")).toBeInTheDocument();
+    expect(field).toHaveAttribute("aria-required", "true");
+    expect(field).not.toHaveAttribute("required");
+  });
+
   it("marks required fields on the label", () => {
     render(<Input label="Name" required />);
     expect(screen.getByText("*")).toBeInTheDocument();

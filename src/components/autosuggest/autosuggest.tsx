@@ -11,6 +11,7 @@ import {
 } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
+import { RequiredMark } from "../required-mark";
 import { useControllableState } from "../../hooks/use-controllable-state";
 import { useDebouncedValue } from "../../hooks/use-debounced-value";
 import { Spinner } from "../spinner/spinner";
@@ -164,6 +165,8 @@ export interface AutosuggestProps extends VariantProps<typeof autosuggestFieldVa
   disabled?: boolean;
   readOnly?: boolean;
   required?: boolean;
+  /** Shows the required mark + `aria-required` without native validation — same as `required` here, for one API across fields. */
+  isRequired?: boolean;
   id?: string;
   name?: string;
   autoFocus?: boolean;
@@ -233,6 +236,7 @@ export function Autosuggest({
   disabled = false,
   readOnly = false,
   required = false,
+  isRequired = false,
   id: idProp,
   name,
   autoFocus,
@@ -731,7 +735,7 @@ export function Autosuggest({
           className={cn("text-sm font-medium text-ink", disabled && "opacity-60")}
         >
           {label}
-          {required ? <span className="text-danger"> *</span> : null}
+          {required || isRequired ? <RequiredMark /> : null}
         </label>
       ) : null}
 
@@ -767,7 +771,7 @@ export function Autosuggest({
             aria-labelledby={label != null ? labelId : undefined}
             aria-describedby={describedBy}
             aria-invalid={isInvalid || undefined}
-            aria-required={required || undefined}
+            aria-required={required || isRequired || undefined}
             disabled={disabled}
             readOnly={readOnly}
             placeholder={hasFieldChips ? undefined : placeholder}

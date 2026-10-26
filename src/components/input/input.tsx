@@ -12,6 +12,7 @@ import {
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
 import { InputSelect, type InputSelectConfig, type InputSelectOption } from "./input-select";
+import { RequiredMark } from "../required-mark";
 
 export type { InputSelectConfig, InputSelectOption };
 
@@ -84,6 +85,11 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "o
     allowPattern?: RegExp;
     /** Force the error styling without an `error` message. */
     invalid?: boolean;
+    /**
+     * Shows the required mark (the red " *" after the label) and sets `aria-required`, without the browser's own
+     * required-field validation — for forms that validate themselves. `required` does both.
+     */
+    isRequired?: boolean;
     /** Classes for the outer wrapper (label + field + hint/error). */
     containerClassName?: string;
     /**
@@ -126,6 +132,7 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
     allowPattern,
     invalid,
     required,
+    isRequired = false,
     disabled,
     readOnly,
     type = "text",
@@ -218,12 +225,15 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
     className,
   );
 
+  const showRequired = Boolean(required) || isRequired;
+
   const inputEl = multiline ? (
     <textarea
       ref={ref as ForwardedRef<HTMLTextAreaElement>}
       id={id}
       rows={rows}
       required={required}
+      aria-required={!required && isRequired ? true : undefined}
       disabled={disabled}
       readOnly={readOnly}
       aria-invalid={isInvalid || undefined}
@@ -240,6 +250,7 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
       id={id}
       type={type}
       required={required}
+      aria-required={!required && isRequired ? true : undefined}
       disabled={disabled}
       readOnly={readOnly}
       aria-invalid={isInvalid || undefined}
@@ -260,7 +271,7 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
           className={cn("text-sm font-medium text-ink", disabled && "opacity-60")}
         >
           {label}
-          {required ? <span className="text-danger"> *</span> : null}
+          {showRequired ? <RequiredMark /> : null}
         </label>
       ) : null}
 

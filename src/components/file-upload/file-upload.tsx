@@ -12,6 +12,7 @@ import {
 } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
+import { RequiredMark } from "../required-mark";
 import { useControllableState } from "../../hooks/use-controllable-state";
 import { FilePreviewDialog } from "./file-preview-dialog";
 
@@ -319,6 +320,11 @@ export interface FileUploadProps extends Omit<
 
   name?: string;
   required?: boolean;
+  /**
+   * Shows the required mark (the red " *" after the label) and sets `aria-required`, without the browser's own
+   * required-field validation — for forms that validate themselves. `required` does both.
+   */
+  isRequired?: boolean;
   disabled?: boolean;
   id?: string;
   className?: string;
@@ -368,6 +374,7 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
     clearable = true,
     name,
     required = false,
+    isRequired = false,
     disabled = false,
     id: idProp,
     className,
@@ -598,7 +605,7 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
           className={cn("text-sm font-medium text-ink", disabled && "opacity-60")}
         >
           {label}
-          {required ? <span className="text-danger"> *</span> : null}
+          {required || isRequired ? <RequiredMark /> : null}
         </label>
       ) : null}
 
@@ -612,6 +619,7 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
         accept={accept}
         multiple={multiple}
         required={required}
+        aria-required={!required && isRequired ? true : undefined}
         disabled={disabled}
         aria-invalid={isInvalid || undefined}
         aria-describedby={describedBy}

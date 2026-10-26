@@ -27,5 +27,6 @@ export default defineConfig({
   // Minify the runtime files. JSDoc still reaches editors via the `.d.ts`.
   minify: true,
   splitting: true,
-  external: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
+  // react-window stays a regular dependency (not bundled), so an app that also uses it shares one copy.
+  external: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react-window"],
 });

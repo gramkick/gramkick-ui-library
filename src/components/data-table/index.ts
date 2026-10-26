@@ -4,6 +4,7 @@ export {
   type DataTableProps,
   type DataTableColumn,
   type DataTableSort,
+  type DataTableInfiniteScroll,
   type RichCell,
   type DataTableVariant,
   type DataTableSize,

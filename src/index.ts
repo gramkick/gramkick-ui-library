@@ -3,6 +3,7 @@ export type { DateRange } from "./lib/date";
 
 export * from "./components/icon";
 export * from "./components/text";
+export * from "./components/required-mark";
 export * from "./components/button";
 export * from "./components/badge";
 export * from "./components/accordion";

@@ -15,6 +15,8 @@ import { Checkbox } from "../selection/selection";
 import { Dropdown } from "../dropdown/dropdown";
 import { EmptyState } from "../empty-state/empty-state";
 import { Skeleton } from "../skeleton/skeleton";
+import { useInfiniteScroll } from "../../hooks/use-infinite-scroll";
+import { VIRTUAL_ROW_HEIGHT, VirtualRows } from "./virtual-rows";
 import { ChevronRightIcon as Chevron, ChevronDownIcon as Caret } from "../icon";
 
 /* ------------------------------------------------------------------ icons -- */
@@ -83,6 +85,22 @@ export interface DataTableColumn<T> {
 export interface DataTableSort {
   id: string;
   dir: "asc" | "desc";
+}
+
+/** See `DataTableProps.infiniteScroll`. */
+export interface DataTableInfiniteScroll {
+  /** More rows are left to load (the spinner row shows, and reaching it calls `onLoadMore`). */
+  hasMore: boolean;
+  /** Loads the next rows — return the request's promise so only one runs at a time. */
+  onLoadMore: () => unknown;
+  /** How early to load, e.g. "0px 0px 200px 0px". Default: when the spinner row itself shows. */
+  rootMargin?: string;
+  /** Height of the scrolling rows box. Default `maxHeight`, else 480px. */
+  height?: number | string;
+  /** Fixed row height in px (virtualised rows can't size to content). Default by `size`: 36 / 48 / 56. */
+  rowHeight?: number;
+  /** Width of the `actions` column in px. Default 96. */
+  actionsWidth?: number;
 }
 
 export interface DataTableProps<T> {
@@ -173,6 +191,16 @@ export interface DataTableProps<T> {
   totalCount?: number;
   /** `data` is already the current page — the table won't slice it. */
   manualPagination?: boolean;
+
+  /* infinite scroll */
+  /**
+   * Load rows as the user scrolls instead of paging: the pager footer is dropped (`pagination` is ignored), the rows
+   * are virtualised with react-window (only those on screen render, however many have loaded) inside a box of
+   * `height` (default `maxHeight`, else 480px), and `onLoadMore` runs when the end of the rows scrolls into view — one
+   * request at a time — with a spinner row while there's more. Pair it with `usePagedList` for the data. Loading /
+   * error / empty states look the same as the paged table's. Tables without it are unchanged.
+   */
+  infiniteScroll?: DataTableInfiniteScroll;
 
   className?: string;
   id?: string;
@@ -421,6 +449,7 @@ export function DataTable<T>({
   pageSizeOptions = [10, 25, 50, 100],
   totalCount,
   manualPagination = false,
+  infiniteScroll,
   className,
   id,
   "aria-label": ariaLabel = "Data table",
@@ -483,12 +512,14 @@ export function DataTable<T>({
   const total = totalCount ?? data.length;
   const pageCount = Math.max(1, Math.ceil(total / Math.max(1, pageSize)));
   const currentPage = Math.min(Math.max(1, page), pageCount);
-  const pageRows = manualPagination
+  // Infinite scroll shows everything loaded so far, like a server-paged table.
+  const showAllRows = manualPagination || infiniteScroll != null;
+  const pageRows = showAllRows
     ? sortedData
     : sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const rowId = (row: T, i: number) => {
-    const abs = manualPagination ? i : (currentPage - 1) * pageSize + i;
+    const abs = showAllRows ? i : (currentPage - 1) * pageSize + i;
     if (getRowId) return getRowId(row, abs);
     const own = (row as unknown as { id?: unknown } | null)?.id;
     return own == null ? String(abs) : String(own);
@@ -525,7 +556,18 @@ export function DataTable<T>({
   };
 
   const totalCols = (selectable ? 1 : 0) + columns.length + (actions ? 1 : 0);
-  const showFooter = pagination;
+  const showFooter = pagination && infiniteScroll == null;
+
+  /* infinite scroll: a spinner row after the last row pulls in the next page when it scrolls into view */
+  const hasMoreRows = Boolean(infiniteScroll?.hasMore) && !loading && !error && pageRows.length > 0;
+  const sentinelRef = useInfiniteScroll<HTMLDivElement>({
+    hasMore: hasMoreRows,
+    onLoadMore: () => infiniteScroll?.onLoadMore(),
+    version: pageRows.length,
+    rootMargin: infiniteScroll?.rootMargin,
+  });
+  // With rows to show, infinite scroll renders the virtualised view; loading / error / empty use the table below.
+  const virtual = infiniteScroll != null && !loading && !error && pageRows.length > 0;
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -580,6 +622,32 @@ export function DataTable<T>({
   // A column that wants to wrap can pass `cellClassName="whitespace-normal"`.
   const tdBase = cn("whitespace-nowrap align-middle", PAD[size]);
 
+  /* ---- shared by the table and the virtualised (infinite scroll) view ---- */
+  // A header's label: a sort button for a sortable column, else the header as given.
+  const headerLabel = (col: DataTableColumn<T>): ReactNode => {
+    if (!col.sortable) return col.header;
+    const activeDir = sort?.id === col.id ? sort.dir : null;
+    return (
+      <button
+        type="button"
+        onClick={() => cycleSort(col.id)}
+        className={cn(
+          "-mx-1 inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded px-1 py-0.5 align-middle font-semibold transition-colors hover:text-ink",
+          activeDir && "text-ink",
+        )}
+      >
+        <span>{col.header}</span>
+        <SortIcon dir={activeDir} />
+      </button>
+    );
+  };
+  // A cell: the column's own `cell`, else its value (a rich-cell object expands into text + subtext).
+  const cellContent = (row: T, i: number, col: DataTableColumn<T>): ReactNode => {
+    if (col.cell) return col.cell(row, i);
+    const value = col.accessor ? col.accessor(row) : (row as unknown as Record<string, unknown>)[col.id];
+    return <CellBody value={value} />;
+  };
+
   /* ---- rows ---- */
   const bodyRows = pageRows.map((row, i) => {
     const rid = rowId(row, i);
@@ -628,11 +696,6 @@ export function DataTable<T>({
         ) : null}
 
         {columns.map((col, ci) => {
-          const value = col.cell
-            ? col.cell(row, i)
-            : col.accessor
-              ? col.accessor(row)
-              : (row as unknown as Record<string, unknown>)[col.id];
           const pinned = pinFirstData && ci === 0;
           return (
             <td
@@ -645,7 +708,7 @@ export function DataTable<T>({
               )}
               style={pinned ? highlightStyle : undefined}
             >
-              {col.cell ? (value as ReactNode) : <CellBody value={value} />}
+              {cellContent(row, i, col)}
             </td>
           );
         })}
@@ -876,6 +939,53 @@ export function DataTable<T>({
       }
     : undefined;
 
+  if (virtual) {
+    return (
+      <div
+        id={id}
+        data-slot="data-table"
+        className={cn(
+          "grid w-full min-w-0 grid-cols-[minmax(0,1fr)] overflow-hidden rounded-gk-lg border border-line bg-canvas",
+          className,
+        )}
+      >
+        {banner}
+        <VirtualRows
+          columns={columns}
+          rows={pageRows}
+          rowId={rowId}
+          size={size}
+          variant={variant}
+          hasMore={hasMoreRows}
+          sentinelRef={sentinelRef}
+          height={infiniteScroll.height ?? maxHeight ?? 480}
+          rowHeight={infiniteScroll.rowHeight ?? VIRTUAL_ROW_HEIGHT[size]}
+          actionsWidth={infiniteScroll.actionsWidth ?? 96}
+          headerLabel={headerLabel}
+          cellContent={cellContent}
+          selectable={selectable}
+          headerSelect={headerSelect}
+          isSelected={(rid) => selectedSet.has(rid) || allPages}
+          onToggle={toggleRow}
+          actions={actions}
+          actionsHeader={actionsHeader}
+          stickyFirstColumn={stickyFirstColumn}
+          stickyActions={stickyActions}
+          highlight={
+            highlightBackgroundColor == null
+              ? undefined
+              : (row, i) =>
+                  (typeof highlightBackgroundColor === "function"
+                    ? highlightBackgroundColor(row, i)
+                    : highlightBackgroundColor) || undefined
+          }
+          ariaLabel={ariaLabel}
+          total={total}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       id={id}
@@ -979,20 +1089,8 @@ export function DataTable<T>({
                         >
                           <Skeleton width={56 + ((ci * 17) % 44)} height={12} />
                         </span>
-                      ) : col.sortable ? (
-                        <button
-                          type="button"
-                          onClick={() => cycleSort(col.id)}
-                          className={cn(
-                            "-mx-1 inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded px-1 py-0.5 align-middle font-semibold transition-colors hover:text-ink",
-                            activeDir && "text-ink",
-                          )}
-                        >
-                          <span>{col.header}</span>
-                          <SortIcon dir={activeDir} />
-                        </button>
                       ) : (
-                        col.header
+                        headerLabel(col)
                       )}
                     </th>
                   );

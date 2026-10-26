@@ -364,4 +364,43 @@ describe("DataTable", () => {
     expect(scroll()).toHaveClass("overflow-y-auto");
     expect(container.querySelector("thead th")).toHaveClass("sticky", "top-0");
   });
+
+  describe("infiniteScroll", () => {
+    it("virtualises the rows (react-window) and drops the pager", () => {
+      render(
+        <DataTable columns={columns} data={rows} pagination aria-label="Members" infiniteScroll={{ hasMore: false, onLoadMore: () => undefined }} />,
+      );
+      const table = screen.getByRole("table", { name: "Members" });
+      expect(within(table).getByText("User 1")).toBeInTheDocument();
+      expect(within(table).queryByText("User 25")).not.toBeInTheDocument(); // off screen → not rendered
+      expect(screen.queryByRole("button", { name: "Next page" })).not.toBeInTheDocument();
+    });
+
+    it("shows a loading row at the end that calls onLoadMore when it scrolls into view", () => {
+      let fire: (() => void) | undefined;
+      class IO {
+        constructor(cb: IntersectionObserverCallback) {
+          fire = () => cb([{ isIntersecting: true } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
+        }
+        observe() {}
+        disconnect() {}
+      }
+      vi.stubGlobal("IntersectionObserver", IO);
+      const onLoadMore = vi.fn(() => Promise.resolve());
+      render(<DataTable columns={columns} data={rows.slice(0, 3)} infiniteScroll={{ hasMore: true, onLoadMore }} />);
+      expect(screen.getByRole("status", { name: "Loading more rows" })).toBeInTheDocument();
+      fire?.();
+      expect(onLoadMore).toHaveBeenCalledTimes(1);
+      vi.unstubAllGlobals();
+    });
+
+    it("drops the loading row when there's nothing more, and keeps the table's loading state", () => {
+      const { rerender } = render(
+        <DataTable columns={columns} data={rows.slice(0, 3)} infiniteScroll={{ hasMore: false, onLoadMore: () => undefined }} />,
+      );
+      expect(screen.queryByRole("status", { name: "Loading more rows" })).not.toBeInTheDocument();
+      rerender(<DataTable columns={columns} data={[]} loading infiniteScroll={{ hasMore: true, onLoadMore: () => undefined }} />);
+      expect(screen.queryByRole("status", { name: "Loading more rows" })).not.toBeInTheDocument();
+    });
+  });
 });

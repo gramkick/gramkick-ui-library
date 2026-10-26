@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { DataTable, type DataTableColumn } from "./data-table";
 import { Badge } from "../badge/badge";
 import { Button } from "../button/button";
+import { usePagedList } from "../../hooks/use-paged-list";
 
 interface Member {
   id: string;
@@ -274,4 +275,32 @@ export const StickyOnMobile: Story = {
       />
     </div>
   ),
+};
+
+function InfiniteDemo(args: Story["args"]) {
+  const fetchPage = useCallback(
+    (page: number) =>
+      new Promise<{ items: Member[]; total: number }>((resolve) =>
+        setTimeout(() => resolve({ items: members.slice((page - 1) * 10, page * 10), total: members.length }), 600),
+      ),
+    [],
+  );
+  const list = usePagedList({ fetchPage });
+  return (
+    <DataTable
+      {...args}
+      columns={args?.columns ?? []}
+      data={list.items}
+      loading={list.loading}
+      error={list.error}
+      maxHeight={360}
+      stickyHeader
+      infiniteScroll={{ hasMore: list.hasMore, onLoadMore: list.loadMore }}
+    />
+  );
+}
+
+/** Rows load as you scroll (no pager): `usePagedList` fetches the pages, `infiniteScroll` drives the table. */
+export const InfiniteScroll: Story = {
+  render: (args) => <InfiniteDemo {...args} />,
 };
