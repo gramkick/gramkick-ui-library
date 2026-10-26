@@ -1,5 +1,14 @@
 # @gramkick/ui
 
+## 0.7.0
+
+### Minor Changes
+
+- 9a4aef8: DatePicker / DateRangePicker: new `align` prop (`"start" | "end" | "auto"`, default `"auto"`). The calendar popover now flips to the right edge of its field when it would otherwise run off the screen.
+- 730e45c: - `isRequired` on `Input`, `Dropdown`, `Autosuggest`, `FileUpload`, `DatePicker`, `DateRangePicker`, `TimePicker` and `DropdownRangePicker`: shows the required mark and sets `aria-required` without the browser's own required-field validation (`required` keeps doing both). New `RequiredMark` export for custom label compositions.
+  - New hooks: `useInfiniteScroll` (IntersectionObserver sentinel, one request at a time, at most one per scroll gesture) and `usePagedList` (page-by-page data with start-over on filter change; late answers for old filters are dropped).
+  - `DataTable`: new opt-in `infiniteScroll={{ hasMore, onLoadMore, height?, rowHeight?, actionsWidth? }}` — rows are virtualised with react-window (new dependency, `react-window@^2.3.0`, not bundled), the pager footer is dropped, and more rows load as the end scrolls into view. Loading / error / empty states match the paged table. Tables without it (incl. every paginated table) are unchanged.
+
 ## 0.6.1
 
 ### Patch Changes
