@@ -128,6 +128,8 @@ export interface DataTableProps<T> {
    */
   highlightBackgroundColor?:
     string | ((row: T, index: number) => string | false | null | undefined);
+  /** Rows marked disabled stay visible but cannot be selected and receive disabled styling. */
+  isRowDisabled?: (row: T, index: number) => boolean;
 
   /** `Skeleton` rows instead of data (kept at row height to avoid layout shift). */
   loading?: boolean;
@@ -418,6 +420,7 @@ export function DataTable<T>({
   onSortChange,
   manualSort = false,
   highlightBackgroundColor,
+  isRowDisabled,
   loading = false,
   loadingRows,
   isHeaderLoading = false,
@@ -526,7 +529,7 @@ export function DataTable<T>({
   };
 
   const selectedSet = new Set(selected);
-  const pageIds = pageRows.map(rowId);
+  const pageIds = pageRows.filter((row, i) => !isRowDisabled?.(row, i)).map(rowId);
   const allOnPage = pageIds.length > 0 && pageIds.every((x) => selectedSet.has(x));
   const someOnPage = !allOnPage && pageIds.some((x) => selectedSet.has(x));
 
@@ -651,7 +654,8 @@ export function DataTable<T>({
   /* ---- rows ---- */
   const bodyRows = pageRows.map((row, i) => {
     const rid = rowId(row, i);
-    const isSel = selectedSet.has(rid) || allPages;
+    const disabled = isRowDisabled?.(row, i) ?? false;
+    const isSel = !disabled && (selectedSet.has(rid) || allPages);
     const striped = variant === "striped" && i % 2 === 1;
     // Opaque tints (no alpha) so the pinned columns can reuse them without the
     // scrolled content ghosting through. Hover is the light `mint`; on striped
@@ -678,7 +682,7 @@ export function DataTable<T>({
           "group",
           ROW_H[size],
           "transition-colors",
-          isSel ? "bg-art" : striped ? "bg-mint hover:bg-art" : "hover:bg-mint",
+          disabled ? "bg-gray-100 opacity-60 grayscale" : isSel ? "bg-art" : striped ? "bg-mint hover:bg-art" : "hover:bg-mint",
         )}
       >
         {selectable ? (
@@ -690,6 +694,7 @@ export function DataTable<T>({
               size="md"
               aria-label={`Select row ${i + 1}`}
               checked={isSel}
+              disabled={disabled}
               onChange={() => toggleRow(rid)}
             />
           </td>
@@ -963,7 +968,8 @@ export function DataTable<T>({
           actionsWidth={infiniteScroll.actionsWidth ?? 96}
           headerLabel={headerLabel}
           cellContent={cellContent}
-          selectable={selectable}
+           selectable={selectable}
+           isRowDisabled={isRowDisabled}
           headerSelect={headerSelect}
           isSelected={(rid) => selectedSet.has(rid) || allPages}
           onToggle={toggleRow}

@@ -41,6 +41,7 @@ export interface VirtualRowsProps<T> {
   stickyFirstColumn: boolean;
   stickyActions: boolean;
   highlight?: (row: T, index: number) => string | undefined;
+  isRowDisabled?: (row: T, index: number) => boolean;
   ariaLabel: string;
   total: number;
 }
@@ -64,6 +65,7 @@ function VirtualRow<T>({ index, style, ...p }: RowComponentProps<RowData<T>>) {
   const row = p.rows[index]!;
   const rid = p.rowId(row, index);
   const selected = p.isSelected(rid);
+  const disabled = p.isRowDisabled?.(row, index) ?? false;
   const striped = p.variant === "striped" && index % 2 === 1;
   const tint = selected ? "bg-art" : striped ? "bg-mint group-hover:bg-art" : "bg-canvas group-hover:bg-mint";
   const highlight = p.highlight?.(row, index);
@@ -80,12 +82,12 @@ function VirtualRow<T>({ index, style, ...p }: RowComponentProps<RowData<T>>) {
       className={cn(
         "group grid border-b border-line text-sm transition-colors",
         p.size === "sm" && "text-xs",
-        selected ? "bg-art" : striped ? "bg-mint hover:bg-art" : "bg-canvas hover:bg-mint",
+        disabled ? "bg-gray-100 opacity-60 grayscale" : selected ? "bg-art" : striped ? "bg-mint hover:bg-art" : "bg-canvas hover:bg-mint",
       )}
     >
       {p.selectable ? (
         <div role="gridcell" className={cn(cell, pinLeft(p.stickyFirstColumn))} style={tone}>
-          <Checkbox size="md" aria-label={`Select row ${index + 1}`} checked={selected} onChange={() => p.onToggle(rid)} />
+          <Checkbox size="md" aria-label={`Select row ${index + 1}`} checked={selected} disabled={disabled} onChange={() => p.onToggle(rid)} />
         </div>
       ) : null}
       {p.columns.map((col, ci) => {
