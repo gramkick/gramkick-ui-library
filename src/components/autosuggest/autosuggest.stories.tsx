@@ -143,7 +143,7 @@ export const MinChars: Story = {
 /**
  * Multi: the selected chips live inside the field while it's blurred, and move
  * into the menu (below the suggestions) while it's focused. `creatable` adds a
- * row with its own input + "Add" button to create entries that aren't options.
+ * a first suggestion row using the text currently entered in the field.
  */
 export const MultiWithCreate: Story = {
   args: {

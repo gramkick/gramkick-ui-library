@@ -63,6 +63,21 @@ function TickIcon({ className }: { className?: string }) {
   );
 }
 
+function PlusIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden="true"
+    >
+      <path d="M8 3v10M3 8h10" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /* ------------------------------------------------------------------ types -- */
 
 export interface AutosuggestOption {
@@ -176,15 +191,15 @@ export interface AutosuggestProps extends VariantProps<typeof autosuggestFieldVa
   /** ✕ in the field to clear the selection + query. Default `true`. */
   clearable?: boolean;
 
-  /** Add a "create" row (own input + Add button) at the bottom of the menu for free-text entries. */
+  /** Add a first suggestion row for creating the text currently entered in the field. */
   creatable?: boolean;
   /** Map the typed text to the option to add. Return an option, a string, or nothing (uses the text). */
   onCreate?: (text: string) => AutosuggestOption | string | void;
-  /** Text on the create button. Default `"Add"`. */
+  /** @deprecated The create action is now rendered as the first suggestion row. */
   createLabel?: ReactNode;
-  /** Placeholder for the create input. Default `"Add a new option"`. */
+  /** @deprecated The create action now uses the main field input. */
   createPlaceholder?: string;
-  /** Accessible label for the create input. Default `"Create a new option"`. */
+  /** @deprecated The create action now uses the main field input. */
   createInputLabel?: string;
 
   emptyMessage?: ReactNode;
@@ -244,9 +259,6 @@ export function Autosuggest({
   clearable = true,
   creatable = false,
   onCreate,
-  createLabel = "Add",
-  createPlaceholder = "Add a new option",
-  createInputLabel = "Create a new option",
   emptyMessage = "No matches",
   loadingMessage = "Searching…",
   minCharsMessage,
@@ -292,7 +304,6 @@ export function Autosuggest({
   );
 
   const [query, setQuery] = useState("");
-  const [createText, setCreateText] = useState("");
   const debouncedQuery = useDebouncedValue(query, delay);
   const [open, setOpen] = useState(false);
   const [placement, setPlacement] = useState<"bottom" | "top">("bottom");
@@ -369,6 +380,13 @@ export function Autosuggest({
   );
   const singleOption = !multiple ? selectedOptions[0] : undefined;
   const hasValue = selectedValues.length > 0;
+  const showCreateOption = creatable && !disabled && !readOnly && query.trim().length > 0;
+  const menuOptionCount = list.length + (showCreateOption ? 1 : 0);
+  const isCreateIndex = useCallback((index: number) => showCreateOption && index === 0, [showCreateOption]);
+  const optionAt = useCallback(
+    (index: number) => (showCreateOption ? list[index - 1] : list[index]),
+    [list, showCreateOption],
+  );
 
   /* ---- open / close ---- */
   const close = useCallback(() => setOpen(false), []);
@@ -390,8 +408,14 @@ export function Autosuggest({
   }, [open, close, multiple, singleOption, labelToText]);
 
   useEffect(() => {
-    setActiveIndex(list.length ? list.findIndex((o) => !o.disabled) : -1);
-  }, [list]);
+    setActiveIndex(
+      menuOptionCount
+        ? Array.from({ length: menuOptionCount }, (_, i) => i).find(
+            (i) => isCreateIndex(i) || !optionAt(i)?.disabled,
+          ) ?? -1
+        : -1,
+    );
+  }, [list, menuOptionCount, showCreateOption, isCreateIndex, optionAt]);
 
   useEffect(() => {
     if (activeIndex >= 0) optionRefs.current[activeIndex]?.scrollIntoView?.({ block: "nearest" });
@@ -453,34 +477,36 @@ export function Autosuggest({
     inputRef.current?.focus();
   }, [commit]);
 
-  const doCreate = useCallback(() => {
-    const raw = createText.trim();
-    if (!raw) return;
-    const result = onCreate?.(raw);
-    const opt: AutosuggestOption =
-      result && typeof result === "object"
-        ? result
-        : typeof result === "string"
-          ? { value: result, label: result }
-          : { value: raw, label: raw };
-    setCreateText("");
-    if (selectedValues.includes(opt.value)) return;
-    selectedCache.current.set(opt.value, opt);
-    if (multiple) {
-      commit([...selectedValues, opt.value]);
-      inputRef.current?.focus();
-    } else {
-      commit([opt.value]);
-      setQuery(labelToText(opt));
-      close();
-      inputRef.current?.focus();
-    }
-  }, [createText, onCreate, selectedValues, multiple, commit, labelToText, close]);
+  const doCreate = useCallback(
+    (text: string) => {
+      const raw = text.trim();
+      if (!raw) return;
+      const result = onCreate?.(raw);
+      const opt: AutosuggestOption =
+        result && typeof result === "object"
+          ? result
+          : typeof result === "string"
+            ? { value: result, label: result }
+            : { value: raw, label: raw };
+      if (selectedValues.includes(opt.value)) return;
+      selectedCache.current.set(opt.value, opt);
+      if (multiple) {
+        commit([...selectedValues, opt.value]);
+        inputRef.current?.focus();
+      } else {
+        commit([opt.value]);
+        setQuery(labelToText(opt));
+        close();
+        inputRef.current?.focus();
+      }
+    }, [onCreate, selectedValues, multiple, commit, labelToText, close]);
 
   /* ---- keyboard ---- */
   const moveActive = useCallback(
     (dir: 1 | -1) => {
-      const enabled = list.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0);
+       const enabled = Array.from({ length: menuOptionCount }, (_, i) => i).filter(
+         (i) => isCreateIndex(i) || !optionAt(i)?.disabled,
+       );
       if (!enabled.length) return;
       const pos = enabled.indexOf(activeIndex);
       const nextPos =
@@ -491,7 +517,7 @@ export function Autosuggest({
           : (pos + dir + enabled.length) % enabled.length;
       setActiveIndex(enabled[nextPos]!);
     },
-    [list, activeIndex],
+    [menuOptionCount, activeIndex, isCreateIndex, optionAt],
   );
 
   const onInputKeyDown = useCallback(
@@ -511,23 +537,28 @@ export function Autosuggest({
         case "Home":
           if (open && e.currentTarget.selectionStart === 0) {
             e.preventDefault();
-            setActiveIndex(list.findIndex((o) => !o.disabled));
+            setActiveIndex(
+              Array.from({ length: menuOptionCount }, (_, i) => i).find(
+                (i) => isCreateIndex(i) || !optionAt(i)?.disabled,
+              ) ?? -1,
+            );
           }
           break;
         case "End":
           if (open && e.currentTarget.selectionStart === e.currentTarget.value.length) {
             e.preventDefault();
-            for (let i = list.length - 1; i >= 0; i--)
-              if (!list[i]!.disabled) {
+            for (let i = menuOptionCount - 1; i >= 0; i--)
+              if (isCreateIndex(i) || !optionAt(i)?.disabled) {
                 setActiveIndex(i);
                 break;
               }
           }
           break;
         case "Enter":
-          if (open && activeIndex >= 0 && list[activeIndex]) {
+          if (open && activeIndex >= 0 && (isCreateIndex(activeIndex) || optionAt(activeIndex))) {
             e.preventDefault();
-            selectOption(list[activeIndex]!);
+            if (isCreateIndex(activeIndex)) doCreate(query);
+            else selectOption(optionAt(activeIndex)!);
           }
           break;
         case "Escape":
@@ -555,7 +586,11 @@ export function Autosuggest({
       open,
       openMenu,
       moveActive,
-      list,
+      menuOptionCount,
+      isCreateIndex,
+      optionAt,
+      query,
+      doCreate,
       activeIndex,
       selectOption,
       close,
@@ -568,7 +603,9 @@ export function Autosuggest({
   );
 
   const activeDescendant =
-    open && activeIndex >= 0 && list[activeIndex] ? `${listboxId}-opt-${activeIndex}` : undefined;
+    open && activeIndex >= 0 && (isCreateIndex(activeIndex) || optionAt(activeIndex))
+      ? `${listboxId}-opt-${activeIndex}`
+      : undefined;
   const showClear = clearable && (hasValue || query.length > 0) && !disabled && !readOnly;
 
   // Multi keeps the already-fetched rows on screen while a new keyword loads
@@ -583,7 +620,7 @@ export function Autosuggest({
     minCharsMessage != null ? (
       <div className="px-3 py-6 text-center text-sm text-muted">{minCharsMessage}</div>
     ) : null
-  ) : list.length === 0 ? (
+  ) : list.length === 0 && !showCreateOption ? (
     <div className="px-3 py-6 text-center text-sm text-muted">{emptyMessage}</div>
   ) : (
     <ul
@@ -594,7 +631,38 @@ export function Autosuggest({
       className="overflow-y-auto py-1"
       style={{ maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight }}
     >
-      {list.map((o, i) => {
+      {showCreateOption ? (
+        <li
+          id={`${listboxId}-opt-0`}
+          role="option"
+          aria-selected="false"
+          ref={(n) => {
+            optionRefs.current[0] = n;
+          }}
+          onMouseEnter={() => setActiveIndex(0)}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => doCreate(query)}
+          className={cn(
+            "flex cursor-pointer items-center",
+            sz.option,
+            sz.optionText,
+            sz.icon,
+            activeIndex === 0 && "bg-mint",
+          )}
+        >
+          <span
+            className="flex size-5 shrink-0 items-center justify-center rounded-full border border-dotted border-leaf text-leaf"
+            aria-hidden="true"
+          >
+            <PlusIcon className="size-3.5" />
+          </span>
+          <span className="min-w-0 flex-1 truncate font-medium text-ink">
+            Add new {asText(label) || "option"} as &quot;{query.trim()}&quot;
+          </span>
+        </li>
+      ) : null}
+      {list.map((o, listIndex) => {
+        const i = listIndex + (showCreateOption ? 1 : 0);
         const isSelected = selectedValues.includes(o.value);
         const active = i === activeIndex;
         return (
@@ -690,41 +758,7 @@ export function Autosuggest({
       </div>
     ) : null;
 
-  const createRow =
-    creatable && !disabled && !readOnly ? (
-      <div className="flex items-center gap-2 border-t border-line p-2">
-        <input
-          value={createText}
-          onChange={(e) => setCreateText(e.target.value)}
-          onMouseDown={(e) => e.stopPropagation()}
-          onKeyDown={(e) => {
-            e.stopPropagation();
-            if (e.key === "Enter") {
-              e.preventDefault();
-              doCreate();
-            } else if (e.key === "Escape") {
-              e.preventDefault();
-              close();
-              inputRef.current?.focus();
-            }
-          }}
-          placeholder={createPlaceholder}
-          aria-label={createInputLabel}
-          className="h-8 min-w-0 flex-1 rounded-gk-sm border border-line bg-canvas px-2.5 text-sm text-ink placeholder:text-muted focus:border-leaf focus:outline-none focus:ring-2 focus:ring-leaf/30"
-        />
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={doCreate}
-          disabled={!createText.trim()}
-          className="inline-flex h-8 shrink-0 cursor-pointer items-center rounded-gk-sm bg-leaf px-3 text-sm font-semibold text-white transition-colors hover:bg-leaf-dark disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {createLabel}
-        </button>
-      </div>
-    ) : null;
-
-  const menuVisible = open && (menuBody != null || createRow != null || chipsRow != null);
+  const menuVisible = open && (menuBody != null || chipsRow != null);
 
   return (
     <div ref={rootRef} className={cn("flex flex-col gap-1.5", containerClassName)}>
@@ -829,7 +863,6 @@ export function Autosuggest({
             )}
           >
             {menuBody}
-            {createRow}
             {chipsRow}
           </div>
         ) : null}

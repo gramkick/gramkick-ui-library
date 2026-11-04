@@ -143,7 +143,7 @@ describe("Autosuggest", () => {
   });
 
   describe("creatable", () => {
-    it("adds a free-text entry from the create row (multi)", async () => {
+    it("adds a free-text entry from the first add-new option (multi)", async () => {
       const user = userEvent.setup();
       const onChange = vi.fn();
       render(
@@ -156,12 +156,13 @@ describe("Autosuggest", () => {
           onChange={onChange}
         />,
       );
-      await user.click(screen.getByRole("combobox"));
-      const createInput = screen.getByRole("textbox", { name: "Create a new option" });
-      await user.type(createInput, "Nashik");
-      await user.click(screen.getByRole("button", { name: "Add" }));
+      const input = screen.getByRole("combobox");
+      await user.type(input, "Nashik");
+      const options = within(screen.getByRole("listbox")).getAllByRole("option");
+      expect(options[0]).toHaveTextContent('Add new Cities as "Nashik"');
+      await user.click(options[0]!);
       expect(onChange).toHaveBeenLastCalledWith(["Nashik"]);
-      expect(createInput).toHaveValue("");
+      expect(input).toHaveValue("Nashik");
     });
 
     it("onCreate maps the text to a value; single select commits + closes on Enter", async () => {
@@ -178,12 +179,12 @@ describe("Autosuggest", () => {
           onChange={onChange}
         />,
       );
-      await user.click(screen.getByRole("combobox"));
-      await user.type(screen.getByRole("textbox", { name: "Create a new option" }), "Nashik");
+      const input = screen.getByRole("combobox");
+      await user.type(input, "Nashik");
       await user.keyboard("{Enter}");
       expect(onCreate).toHaveBeenCalledWith("Nashik");
       expect(onChange).toHaveBeenLastCalledWith("new:nashik");
-      expect(screen.getByRole("combobox")).toHaveValue("Nashik");
+      expect(input).toHaveValue("Nashik");
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     });
   });
