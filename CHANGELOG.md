@@ -1,5 +1,11 @@
 # @gramkick/ui
 
+## 0.7.2
+
+### Patch Changes
+
+- 5bd5114: fixes
+
 ## 0.7.1
 
 ### Patch Changes
